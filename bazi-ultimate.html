@@ -1,0 +1,1460 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>✨ 易数量子命盤 | Bazi Quantum ✨</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Montserrat:wght@300;400;500;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;700&display=swap');
+
+        * {
+            color: #e0d5c7;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(135deg, #0a0a1f 0%, #1a0a2e 25%, #2d0a4e 50%, #1a0a2e 75%, #0a0a1f 100%);
+            background-attachment: fixed;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* 背景装饰 - 八卦和中国元素 */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                radial-gradient(circle at 10% 20%, rgba(212, 175, 55, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 90% 80%, rgba(139, 27, 168, 0.08) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* 八卦纹样背景 */
+        body::after {
+            content: '☯';
+            position: fixed;
+            font-size: 800px;
+            opacity: 0.03;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            z-index: 0;
+            color: #d4af37;
+        }
+
+        .content-wrapper {
+            position: relative;
+            z-index: 1;
+        }
+
+        .lang-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 100;
+            display: flex;
+            gap: 8px;
+            background: rgba(26, 10, 46, 0.9);
+            padding: 8px;
+            border-radius: 25px;
+            border: 1px solid #d4af37;
+        }
+
+        .lang-btn {
+            background: rgba(106, 5, 114, 0.5);
+            border: 1px solid #d4af37;
+            color: #d4af37;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .lang-btn.active {
+            background: linear-gradient(135deg, #d4af37, #c8a882);
+            color: #1a0a2e;
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.5);
+        }
+
+        .header-cn {
+            font-family: 'Noto Serif SC', serif;
+            font-weight: 700;
+            letter-spacing: 3px;
+        }
+
+        .info-card {
+            background: rgba(26, 10, 46, 0.85);
+            border: 2px solid #d4af37;
+            border-radius: 12px;
+            box-shadow: 0 0 30px rgba(212, 175, 55, 0.2), inset 0 0 20px rgba(212, 175, 55, 0.05);
+            backdrop-filter: blur(10px);
+        }
+
+        .input-mystical {
+            background: rgba(106, 5, 114, 0.2);
+            border: 2px solid #6a0572;
+            color: #e0d5c7;
+            transition: all 0.3s ease;
+        }
+
+        .input-mystical:focus {
+            border-color: #d4af37;
+            background: rgba(106, 5, 114, 0.3);
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.3);
+            outline: none;
+        }
+
+        .input-mystical::placeholder {
+            color: rgba(224, 213, 199, 0.5);
+        }
+
+        .btn-mystical {
+            background: linear-gradient(135deg, #6a0572 0%, #8b1ba8 100%);
+            box-shadow: 0 0 20px rgba(106, 5, 114, 0.5);
+            transition: all 0.3s ease;
+            color: #fff;
+            font-weight: bold;
+        }
+
+        .btn-mystical:hover {
+            box-shadow: 0 0 40px rgba(106, 5, 114, 0.8), 0 0 60px rgba(212, 175, 55, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #d4af37, #8b1ba8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .spinner {
+            border: 4px solid rgba(212, 175, 55, 0.3);
+            border-top: 4px solid #d4af37;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .metric-card {
+            background: rgba(106, 5, 114, 0.3);
+            border-left: 4px solid #d4af37;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.1);
+        }
+
+        .metric-label {
+            color: #d4af37;
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+        }
+
+        .metric-value {
+            color: #d4af37;
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 12px;
+        }
+
+        .metric-description {
+            color: #c8a882;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        .soul-core-card {
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.08), rgba(106, 5, 114, 0.15));
+            border: 2px solid #d4af37;
+            padding: 40px 32px;
+            border-radius: 12px;
+            text-align: center;
+            margin: 30px 0;
+            box-shadow: 0 0 30px rgba(212, 175, 55, 0.15);
+        }
+
+        .soul-core-title {
+            color: #d4af37;
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .soul-core-name {
+            color: #d4af37;
+            font-size: 2.8rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            font-style: italic;
+        }
+
+        .soul-core-name.cn {
+            font-family: 'Noto Serif SC', serif;
+            font-size: 2.2rem;
+            letter-spacing: 3px;
+            font-style: normal;
+        }
+
+        .soul-core-desc {
+            color: #e0d5c7;
+            font-size: 1.05rem;
+            line-height: 1.8;
+        }
+
+        .archetype-card {
+            background: rgba(26, 10, 46, 0.8);
+            border: 2px solid #d4af37;
+            padding: 24px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.1);
+        }
+
+        .superpower {
+            background: rgba(74, 222, 128, 0.08);
+            border-left: 4px solid #4ade80;
+            padding: 16px;
+            margin-bottom: 12px;
+            border-radius: 4px;
+        }
+
+        .superpower-label {
+            color: #4ade80;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .kryptonite {
+            background: rgba(239, 68, 68, 0.08);
+            border-left: 4px solid #ef4444;
+            padding: 16px;
+            margin-bottom: 12px;
+            border-radius: 4px;
+        }
+
+        .kryptonite-label {
+            color: #ef4444;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .radar-container {
+            background: rgba(26, 10, 46, 0.8);
+            border: 2px solid #d4af37;
+            padding: 24px;
+            border-radius: 12px;
+            margin: 24px 0;
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.1);
+        }
+
+        .module-title {
+            color: #d4af37;
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin: 50px 0 30px 0;
+            padding-bottom: 15px;
+            border-bottom: 2px solid rgba(212, 175, 55, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .module-title.cn {
+            font-family: 'Noto Serif SC', serif;
+            font-size: 1.6rem;
+            letter-spacing: 4px;
+            text-transform: none;
+        }
+
+        .ritual-box {
+            background: rgba(106, 5, 114, 0.3);
+            border-left: 4px solid #d4af37;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+        }
+
+        .ritual-title {
+            color: #d4af37;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .ritual-content {
+            color: #e0d5c7;
+            line-height: 1.6;
+        }
+
+        .color-swatch {
+            display: inline-block;
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            margin: 0 12px;
+            border: 2px solid #d4af37;
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.3);
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            color: #d4af37 !important;
+        }
+
+        p, div, span, li, label {
+            color: #e0d5c7 !important;
+        }
+
+        .hidden-cn { display: none; }
+        .hidden-en { display: none; }
+
+        body.lang-zh .hidden-cn { display: inline; }
+        body.lang-zh .hidden-en { display: none; }
+        body.lang-en .hidden-cn { display: none; }
+        body.lang-en .hidden-en { display: inline; }
+
+        @media (max-width: 768px) {
+            .lang-toggle {
+                top: 10px;
+                right: 10px;
+            }
+            .lang-btn {
+                padding: 6px 12px;
+                font-size: 0.8rem;
+            }
+            .soul-core-name {
+                font-size: 1.8rem;
+            }
+            .module-title {
+                font-size: 1.3rem;
+            }
+        }
+    </style>
+</head>
+<body class="lang-en">
+    <!-- Language Toggle -->
+    <div class="lang-toggle">
+        <button class="lang-btn active" onclick="setLanguage('en')" id="langBtnEn">ENGLISH</button>
+        <button class="lang-btn" onclick="setLanguage('zh')" id="langBtnZh">中文</button>
+    </div>
+
+    <div class="content-wrapper min-h-screen py-8 px-4">
+        <div class="max-w-6xl mx-auto">
+            <!-- Header -->
+            <div class="text-center mb-16">
+                <h1 class="title-font text-6xl md:text-7xl font-bold mb-4 gradient-text">
+                    <span class="hidden-en">✨ BAZI QUANTUM ✨</span>
+                    <span class="hidden-cn header-cn">✨ 易数量子命盤 ✨</span>
+                </h1>
+                <p class="text-lg tracking-widest">
+                    <span class="hidden-en">Birth Chart AI | Energy Matrix | Life Alignment Protocol</span>
+                    <span class="hidden-cn">生辰八字量化分析 | 能量矩阵 | 人生对齐协议</span>
+                </p>
+            </div>
+
+            <!-- Form -->
+            <div class="info-card p-8 mb-8" id="formContainer">
+                <form id="baziForm" class="space-y-6">
+                    <div>
+                        <label class="block text-purple-200 mb-2 font-semibold">
+                            <span class="hidden-en">YOUR NAME</span>
+                            <span class="hidden-cn">您的姓名</span>
+                        </label>
+                        <input type="text" id="userName" placeholder="Enter your name / 输入您的名字" class="input-mystical w-full px-4 py-3 rounded-lg" required>
+                    </div>
+
+                    <div>
+                        <label class="block text-purple-200 mb-3 font-semibold">
+                            <span class="hidden-en">BIRTH DATE & TIME (Gregorian Calendar)</span>
+                            <span class="hidden-cn">出生日期与时间（阳历）</span>
+                        </label>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                            <div>
+                                <label class="text-sm text-purple-300 mb-1 block"><span class="hidden-en">YEAR</span><span class="hidden-cn">年</span></label>
+                                <input type="number" id="birthYear" placeholder="1990" min="1900" max="2024" class="input-mystical w-full px-4 py-3 rounded-lg" required>
+                            </div>
+                            <div>
+                                <label class="text-sm text-purple-300 mb-1 block"><span class="hidden-en">MONTH</span><span class="hidden-cn">月</span></label>
+                                <input type="number" id="birthMonth" placeholder="1-12" min="1" max="12" class="input-mystical w-full px-4 py-3 rounded-lg" required>
+                            </div>
+                            <div>
+                                <label class="text-sm text-purple-300 mb-1 block"><span class="hidden-en">DAY</span><span class="hidden-cn">日</span></label>
+                                <input type="number" id="birthDay" placeholder="1-31" min="1" max="31" class="input-mystical w-full px-4 py-3 rounded-lg" required>
+                            </div>
+                            <div>
+                                <label class="text-sm text-purple-300 mb-1 block"><span class="hidden-en">HOUR</span><span class="hidden-cn">时辰</span></label>
+                                <select id="birthHour" class="input-mystical w-full px-4 py-3 rounded-lg" required>
+                                    <option value="">Select Hour / 选择</option>
+                                    <option value="0"><span class="hidden-en">Zi (23-1)</span><span class="hidden-cn">子时 (23-1)</span></option>
+                                    <option value="1"><span class="hidden-en">Chou (1-3)</span><span class="hidden-cn">丑时 (1-3)</span></option>
+                                    <option value="2"><span class="hidden-en">Yin (3-5)</span><span class="hidden-cn">寅时 (3-5)</span></option>
+                                    <option value="3"><span class="hidden-en">Mao (5-7)</span><span class="hidden-cn">卯时 (5-7)</span></option>
+                                    <option value="4"><span class="hidden-en">Chen (7-9)</span><span class="hidden-cn">辰时 (7-9)</span></option>
+                                    <option value="5"><span class="hidden-en">Si (9-11)</span><span class="hidden-cn">巳时 (9-11)</span></option>
+                                    <option value="6"><span class="hidden-en">Wu (11-13)</span><span class="hidden-cn">午时 (11-13)</span></option>
+                                    <option value="7"><span class="hidden-en">Wei (13-15)</span><span class="hidden-cn">未时 (13-15)</span></option>
+                                    <option value="8"><span class="hidden-en">Shen (15-17)</span><span class="hidden-cn">申时 (15-17)</span></option>
+                                    <option value="9"><span class="hidden-en">You (17-19)</span><span class="hidden-cn">酉时 (17-19)</span></option>
+                                    <option value="10"><span class="hidden-en">Xu (19-21)</span><span class="hidden-cn">戌时 (19-21)</span></option>
+                                    <option value="11"><span class="hidden-en">Hai (21-23)</span><span class="hidden-cn">亥时 (21-23)</span></option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-purple-200 mb-3 font-semibold">
+                            <span class="hidden-en">GENDER</span>
+                            <span class="hidden-cn">性别</span>
+                        </label>
+                        <div class="flex gap-4">
+                            <label class="flex items-center cursor-pointer">
+                                <input type="radio" name="gender" value="male" class="mr-2" required>
+                                <span><span class="hidden-en">♂ MALE</span><span class="hidden-cn">♂ 男</span></span>
+                            </label>
+                            <label class="flex items-center cursor-pointer">
+                                <input type="radio" name="gender" value="female" class="mr-2" required>
+                                <span><span class="hidden-en">♀ FEMALE</span><span class="hidden-cn">♀ 女</span></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-mystical w-full py-4 text-white font-bold text-lg rounded-lg">
+                        <span class="hidden-en">🔮 GENERATE QUANTUM CHART</span>
+                        <span class="hidden-cn">🔮 生成量子命盤</span>
+                    </button>
+                </form>
+            </div>
+
+            <!-- Loading -->
+            <div id="loadingContainer" class="hidden text-center mb-8">
+                <div class="spinner mx-auto mb-4"></div>
+                <p class="text-purple-300 text-lg">
+                    <span class="hidden-en">Quantum entanglement in progress...</span>
+                    <span class="hidden-cn">正在推演命盤中...</span>
+                </p>
+            </div>
+
+            <!-- Results -->
+            <div id="resultContainer" class="hidden">
+                <!-- MODULE 1 -->
+                <h2 class="module-title">
+                    <span class="hidden-en">MODULE 1: ENERGY MATRIX</span>
+                    <span class="hidden-cn">模块一：能量矩阵</span>
+                </h2>
+
+                <div class="soul-core-card">
+                    <div class="soul-core-title">
+                        <span class="hidden-en">YOUR SOUL CORE ARCHETYPE</span>
+                        <span class="hidden-cn">你的灵魂核心原型</span>
+                    </div>
+                    <div class="soul-core-name" id="soulCoreName">—</div>
+                    <div class="soul-core-name cn hidden-cn" id="soulCoreNameCN">—</div>
+                    <div class="soul-core-desc" id="soulCoreDesc">—</div>
+                </div>
+
+                <!-- Energy Breakdown -->
+                <div class="info-card p-8 mb-8">
+                    <h3 class="text-2xl font-bold gradient-text mb-8">
+                        <span class="hidden-en">THE ENERGY BREAKDOWN</span>
+                        <span class="hidden-cn">五行能量分布</span>
+                    </h3>
+                    <div id="energyBreakdownContainer" class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div id="radarChartContainer" class="radar-container">
+                            <canvas id="radarChart"></canvas>
+                        </div>
+                        <div id="energyBarsContainer" class="space-y-4"></div>
+                    </div>
+                </div>
+
+                <!-- Vibe Metrics -->
+                <div class="info-card p-8 mb-8">
+                    <h3 class="text-2xl font-bold gradient-text mb-8">
+                        <span class="hidden-en">THE VIBE METRICS (Core Spiritual Indicators)</span>
+                        <span class="hidden-cn">三大核心灵性指标</span>
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="metric-card">
+                            <div class="metric-label">
+                                <span class="hidden-en">GROUNDING CAPACITY</span>
+                                <span class="hidden-cn">显化能力</span>
+                            </div>
+                            <div class="metric-value" id="groundingScore">0/100</div>
+                            <div class="metric-description" id="groundingDesc">—</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-label">
+                                <span class="hidden-en">BURNOUT RISK</span>
+                                <span class="hidden-cn">精神内耗风险</span>
+                            </div>
+                            <div class="metric-value" id="burnoutScore">0/100</div>
+                            <div class="metric-description" id="burnoutDesc">—</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-label">
+                                <span class="hidden-en">INTUITION SCORE</span>
+                                <span class="hidden-cn">直觉感知力</span>
+                            </div>
+                            <div class="metric-value" id="intuitionScore">0/100</div>
+                            <div class="metric-description" id="intuitionDesc">—</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MODULE 2 -->
+                <h2 class="module-title">
+                    <span class="hidden-en">MODULE 2: CORE ARCHETYPE & PSYCHOLOGY</span>
+                    <span class="hidden-cn">模块二：心理原型分析</span>
+                </h2>
+                <div id="archetypeContainer" class="info-card p-8 mb-8"></div>
+
+                <!-- MODULE 3 -->
+                <h2 class="module-title">
+                    <span class="hidden-en">MODULE 3: ROMANTIC ALIGNMENT & ATTACHMENT</span>
+                    <span class="hidden-cn">模块三：爱情与亲密关系</span>
+                </h2>
+                <div class="info-card p-8 mb-8">
+                    <div id="loveContainer"></div>
+                </div>
+
+                <!-- MODULE 4 -->
+                <h2 class="module-title">
+                    <span class="hidden-en">MODULE 4: ABUNDANCE FREQUENCY & CAREER</span>
+                    <span class="hidden-cn">模块四：财富显化与职业</span>
+                </h2>
+                <div class="info-card p-8 mb-8">
+                    <div id="careerContainer"></div>
+                </div>
+
+                <!-- MODULE 5 -->
+                <h2 class="module-title">
+                    <span class="hidden-en">MODULE 5: COSMIC SEASONS (Your Life Timeline)</span>
+                    <span class="hidden-cn">模块五：宇宙季节（人生周期）</span>
+                </h2>
+                <div class="info-card p-8 mb-8">
+                    <div id="cosmicContainer"></div>
+                </div>
+
+                <!-- MODULE 6 -->
+                <h2 class="module-title">
+                    <span class="hidden-en">MODULE 6: HIGH-VIBE RITUALS & ENERGY BIOHACKING</span>
+                    <span class="hidden-cn">模块六：能量仪式与改运秘法</span>
+                </h2>
+                <div class="info-card p-8 mb-8">
+                    <div id="ritualContainer"></div>
+                </div>
+
+                <!-- Restart -->
+                <button onclick="location.reload()" class="btn-mystical w-full py-3 text-white font-bold rounded-lg mt-12">
+                    <span class="hidden-en">🔄 NEW QUANTUM READING</span>
+                    <span class="hidden-cn">🔄 重新测算</span>
+                </button>
+            </div>
+
+            <!-- Error -->
+            <div id="errorContainer" class="hidden bg-red-900 bg-opacity-50 border border-red-500 rounded-lg p-6 text-red-200">
+                <p id="errorText"></p>
+                <button onclick="document.getElementById('errorContainer').classList.add('hidden')" class="mt-4 px-4 py-2 bg-red-700 hover:bg-red-600 rounded-lg">
+                    <span class="hidden-en">CLOSE</span>
+                    <span class="hidden-cn">关闭</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script>
+        // ===== LANGUAGE SYSTEM =====
+        function setLanguage(lang) {
+            document.body.className = 'lang-' + lang;
+            document.getElementById('langBtnEn').classList.toggle('active', lang === 'en');
+            document.getElementById('langBtnZh').classList.toggle('active', lang === 'zh');
+            localStorage.setItem('baziLang', lang);
+        }
+
+        // Load saved language
+        const savedLang = localStorage.getItem('baziLang') || 'en';
+        setLanguage(savedLang);
+
+        // ===== CONSTANTS & DATA =====
+        const TIAN_GAN = ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸'];
+        const DI_ZHI = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
+
+        const WUXING_MAP = {
+            甲: 'wood', 乙: 'wood', 丙: 'fire', 丁: 'fire',
+            戊: 'earth', 己: 'earth', 庚: 'metal', 辛: 'metal',
+            壬: 'water', 癸: 'water'
+        };
+
+        const WUXING_ZHI = {
+            子: 'water', 丑: 'earth', 寅: 'wood', 卯: 'wood', 辰: 'earth', 巳: 'fire',
+            午: 'fire', 未: 'earth', 申: 'metal', 酉: 'metal', 戌: 'earth', 亥: 'water'
+        };
+
+        // Soul Core Archetypes
+        const SOUL_CORES = {
+            wood: {
+                yang: {
+                    name_en: "The Ancient Redwood",
+                    name_cn: "古老红杉",
+                    desc_en: "Yang Wood embodies pioneering force—standing tall, pushing expansion, commanding respect through vitality. Built for growth and breaking new ground.",
+                    desc_cn: "阳木如古老红杉，屹立不倒，开创格局。你天生具有开拓精神，生命力旺盛，自然吸引他人追随。"
+                },
+                yin: {
+                    name_en: "The Verdant Vine",
+                    name_cn: "翠绿藤蔓",
+                    desc_en: "Yin Wood flows like gentle vines—rooted yet flexible. Your superpower is adaptability; you thrive in nurturing collaboration.",
+                    desc_cn: "阴木如藤蔓缠绕，柔而有韧。你擅长融入环境，与他人协作共生，柔中有刚。"
+                }
+            },
+            fire: {
+                yang: {
+                    name_en: "The Wildfire Phoenix",
+                    name_cn: "烈火凤凰",
+                    desc_en: "Yang Fire blazes with passion—a phoenix reborn. You radiate charisma and naturally magnetize others into your vision.",
+                    desc_cn: "阳火如凤凰涅槃，炽热而璀璨。你自带光芒，热烈而富感染力，是天然的领导者。"
+                },
+                yin: {
+                    name_en: "The Cosmic Torch",
+                    name_cn: "宇宙火烛",
+                    desc_en: "Yin Fire glows like a cosmic torch—spiritual and introspective. You perceive nuances and illuminate hearts through depth.",
+                    desc_cn: "阴火如烛光轻轻摇晃，温暖而柔和。你洞察细微，用同理心温暖他人，是天然的疗愈者。"
+                }
+            },
+            earth: {
+                yang: {
+                    name_en: "The Ancient Mountain",
+                    name_cn: "苍古高山",
+                    desc_en: "Yang Earth is bedrock—solid and commanding. You are a builder of empires, your gift is manifestation into tangible reality.",
+                    desc_cn: "阳土如高山耸立，稳定而可靠。你是天生的建筑师，能将梦想落地成现实。"
+                },
+                yin: {
+                    name_en: "The Sacred Garden",
+                    name_cn: "圣洁花园",
+                    desc_en: "Yin Earth is fertile soil—nurturing life from beneath. Your sensitivity makes you a natural healer and facilitator.",
+                    desc_cn: "阴土如肥沃花园，柔和而滋养。你有静默的力量，善于为他人创造成长的空间。"
+                }
+            },
+            metal: {
+                yang: {
+                    name_en: "The Tempered Blade",
+                    name_cn: "淬火之剑",
+                    desc_en: "Yang Metal is sharp and decisive—cutting through illusion. You excel at crystallizing chaos into elegant systems.",
+                    desc_cn: "阳金如利刃锋锐，分析能力超群。你能洞穿表象，建立秩序，追求卓越。"
+                },
+                yin: {
+                    name_en: "The Luminous Pearl",
+                    name_cn: "璀璨明珠",
+                    desc_en: "Yin Metal is precious and refined. Your strength lies in discernment and spiritual refinement.",
+                    desc_cn: "阴金如珍珠闪耀，高洁而精致。你品味独特，修养深厚，见识广博。"
+                }
+            },
+            water: {
+                yang: {
+                    name_en: "The Restless Ocean",
+                    name_cn: "汹涌大洋",
+                    desc_en: "Yang Water is boundless and powerful—ever-moving. You understand human nature deeply, driven by ambition and emotion.",
+                    desc_cn: "阳水如浩瀚大洋，深邃而澎湃。你洞察人性，野心勃勃，智慧深沉。"
+                },
+                yin: {
+                    name_en: "The Cosmic Mist",
+                    name_cn: "宇宙迷雾",
+                    desc_en: "Yin Water is mystical mist—intuitive and formless. Your superpower is understanding the unseen spiritual realms.",
+                    desc_cn: "阴水如迷蒙雾气，神秘而柔和。你灵感丰富，直觉敏锐，与无形界相连。"
+                }
+            }
+        };
+
+        // ===== CORE CALCULATION =====
+        function getGanZhi(year, month, day, hour) {
+            const yearGan = TIAN_GAN[(year - 1900) % 10];
+            const yearZhi = DI_ZHI[(year - 1900) % 12];
+            const monthGanIndex = ((year - 1900) * 2 + month - 1) % 10;
+            const monthGan = TIAN_GAN[monthGanIndex];
+            const monthZhi = DI_ZHI[(month + 1) % 12 || 12];
+            const days = new Date(year, month - 1, day).getDate();
+            const dayGanIndex = (year * 0.2422 + month * 1.6278 + days - 1) % 10;
+            const dayGan = TIAN_GAN[Math.floor(dayGanIndex)];
+            const dayZhi = DI_ZHI[((days - 1) % 12)];
+            const hourIndex = hour % 12;
+            const hourGan = TIAN_GAN[(dayGanIndex * 2 + hourIndex) % 10];
+            const hourZhi = DI_ZHI[hourIndex];
+
+            return {
+                year: yearGan + yearZhi, month: monthGan + monthZhi,
+                day: dayGan + dayZhi, hour: hourGan + hourZhi,
+                dayGan: dayGan
+            };
+        }
+
+        function countWuxing(baziData) {
+            const count = { fire: 0, earth: 0, metal: 0, water: 0, wood: 0 };
+            [baziData.year[0], baziData.month[0], baziData.day[0], baziData.hour[0]].forEach(char => {
+                const wuxing = WUXING_MAP[char];
+                if (wuxing) count[wuxing]++;
+            });
+            [baziData.year[1], baziData.month[1], baziData.day[1], baziData.hour[1]].forEach(char => {
+                const wuxing = WUXING_ZHI[char];
+                if (wuxing) count[wuxing]++;
+            });
+            return count;
+        }
+
+        function analyzeFate(baziData, wuxingCount) {
+            const total = Object.values(wuxingCount).reduce((a, b) => a + b, 0);
+            const fireRatio = wuxingCount.fire / total;
+            const earthRatio = wuxingCount.earth / total;
+            const metalRatio = wuxingCount.metal / total;
+            const waterRatio = wuxingCount.water / total;
+            const woodRatio = wuxingCount.wood / total;
+            const dayMasterElement = WUXING_MAP[baziData.dayGan];
+            const dayMasterYin = '乙丁己辛癸'.includes(baziData.dayGan) ? 'yin' : 'yang';
+            const groundingScore = Math.min(100, (earthRatio + metalRatio) * 150);
+            const burnoutRisk = 100 - Math.min(100, (waterRatio + woodRatio) * 100);
+            const intuitionScore = Math.min(100, (waterRatio + fireRatio) * 150);
+
+            return {
+                fireRatio, earthRatio, metalRatio, waterRatio, woodRatio,
+                groundingScore: Math.floor(groundingScore),
+                burnoutRisk: Math.floor(burnoutRisk),
+                intuitionScore: Math.floor(intuitionScore),
+                dayMasterElement, dayMasterYin
+            };
+        }
+
+        // ===== RENDER FUNCTIONS =====
+        function renderEnergyMatrix(wuxingCount, fateAnalysis) {
+            const total = Object.values(wuxingCount).reduce((a, b) => a + b, 0);
+            const ctx = document.getElementById('radarChart').getContext('2d');
+
+            const firePercent = (wuxingCount.fire / total) * 100;
+            const earthPercent = (wuxingCount.earth / total) * 100;
+            const metalPercent = (wuxingCount.metal / total) * 100;
+            const waterPercent = (wuxingCount.water / total) * 100;
+            const woodPercent = (wuxingCount.wood / total) * 100;
+
+            new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['🔴 FIRE', '🟫 EARTH', '🟡 METAL', '💧 WATER', '🌳 WOOD'],
+                    datasets: [{
+                        label: 'Energy Signature',
+                        data: [firePercent, earthPercent, metalPercent, waterPercent, woodPercent],
+                        borderColor: '#d4af37',
+                        backgroundColor: 'rgba(212, 175, 55, 0.15)',
+                        pointBackgroundColor: '#d4af37',
+                        pointBorderColor: '#fff',
+                        pointRadius: 6,
+                        pointHoverRadius: 8,
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#d4af37',
+                                font: { size: 12, weight: 'bold' },
+                                padding: 20
+                            },
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(26, 10, 46, 0.9)',
+                            titleColor: '#d4af37',
+                            bodyColor: '#e0d5c7',
+                            borderColor: '#d4af37',
+                            borderWidth: 1,
+                            padding: 12,
+                            titleFont: { weight: 'bold' }
+                        }
+                    },
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            max: 40,
+                            ticks: {
+                                color: '#d4af37',
+                                font: { size: 11, weight: 'bold' },
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(212, 175, 55, 0.2)',
+                                lineWidth: 1.5
+                            },
+                            pointLabels: {
+                                color: '#d4af37',
+                                font: { size: 13, weight: 'bold' },
+                                padding: 15
+                            }
+                        }
+                    }
+                }
+            });
+
+            const barsHTML = `
+                <div class="space-y-5">
+                    <div>
+                        <div class="flex justify-between mb-2">
+                            <span class="font-bold text-yellow-400"><span class="hidden-en">🔴 FIRE</span><span class="hidden-cn">🔴 火</span></span>
+                            <span class="text-d4af37 font-bold text-lg">${Math.round(firePercent)}%</span>
+                        </div>
+                        <div class="w-full bg-gray-800 rounded-full h-4 overflow-hidden border border-yellow-600">
+                            <div class="bg-gradient-to-r from-red-600 to-yellow-500 h-4 rounded-full transition-all duration-1000" style="width: ${firePercent}%"></div>
+                        </div>
+                        <p class="text-xs text-purple-300 mt-1"><span class="hidden-en">Passion • Action • Visibility</span><span class="hidden-cn">激情 • 行动 • 显现</span></p>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between mb-2">
+                            <span class="font-bold text-yellow-600"><span class="hidden-en">🟫 EARTH</span><span class="hidden-cn">🟫 土</span></span>
+                            <span class="text-d4af37 font-bold text-lg">${Math.round(earthPercent)}%</span>
+                        </div>
+                        <div class="w-full bg-gray-800 rounded-full h-4 overflow-hidden border border-yellow-700">
+                            <div class="bg-gradient-to-r from-yellow-700 to-orange-600 h-4 rounded-full transition-all duration-1000" style="width: ${earthPercent}%"></div>
+                        </div>
+                        <p class="text-xs text-purple-300 mt-1"><span class="hidden-en">Grounding • Stability • Manifestation</span><span class="hidden-cn">落地 • 稳定 • 显化</span></p>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between mb-2">
+                            <span class="font-bold text-gray-300"><span class="hidden-en">🟡 METAL</span><span class="hidden-cn">🟡 金</span></span>
+                            <span class="text-d4af37 font-bold text-lg">${Math.round(metalPercent)}%</span>
+                        </div>
+                        <div class="w-full bg-gray-800 rounded-full h-4 overflow-hidden border border-gray-500">
+                            <div class="bg-gradient-to-r from-gray-400 to-gray-200 h-4 rounded-full transition-all duration-1000" style="width: ${metalPercent}%"></div>
+                        </div>
+                        <p class="text-xs text-purple-300 mt-1"><span class="hidden-en">Clarity • Precision • Authority</span><span class="hidden-cn">清晰 • 精确 • 权威</span></p>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between mb-2">
+                            <span class="font-bold text-blue-400"><span class="hidden-en">💧 WATER</span><span class="hidden-cn">💧 水</span></span>
+                            <span class="text-d4af37 font-bold text-lg">${Math.round(waterPercent)}%</span>
+                        </div>
+                        <div class="w-full bg-gray-800 rounded-full h-4 overflow-hidden border border-blue-600">
+                            <div class="bg-gradient-to-r from-blue-600 to-blue-400 h-4 rounded-full transition-all duration-1000" style="width: ${waterPercent}%"></div>
+                        </div>
+                        <p class="text-xs text-purple-300 mt-1"><span class="hidden-en">Intuition • Flow • Wisdom</span><span class="hidden-cn">直觉 • 流动 • 智慧</span></p>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between mb-2">
+                            <span class="font-bold text-green-400"><span class="hidden-en">🌳 WOOD</span><span class="hidden-cn">🌳 木</span></span>
+                            <span class="text-d4af37 font-bold text-lg">${Math.round(woodPercent)}%</span>
+                        </div>
+                        <div class="w-full bg-gray-800 rounded-full h-4 overflow-hidden border border-green-600">
+                            <div class="bg-gradient-to-r from-green-600 to-green-400 h-4 rounded-full transition-all duration-1000" style="width: ${woodPercent}%"></div>
+                        </div>
+                        <p class="text-xs text-purple-300 mt-1"><span class="hidden-en">Growth • Creativity • Expansion</span><span class="hidden-cn">成长 • 创造力 • 扩展</span></p>
+                    </div>
+                </div>
+            `;
+            document.getElementById('energyBarsContainer').innerHTML = barsHTML;
+        }
+
+        function renderVibeMetrics(fateAnalysis) {
+            document.getElementById('groundingScore').textContent = fateAnalysis.groundingScore + '/100';
+            document.getElementById('groundingDesc').innerHTML = fateAnalysis.groundingScore > 70
+                ? '<span class="hidden-en">Manifestation master—ideas crystallize through you.</span><span class="hidden-cn">显化大师——你能将想法结晶为现实。</span>'
+                : '<span class="hidden-en">Moderate grounding. You have flashes of brilliance.</span><span class="hidden-cn">显化能力中等。你需要结构来支撑想法。</span>';
+
+            document.getElementById('burnoutScore').textContent = fateAnalysis.burnoutRisk + '/100';
+            document.getElementById('burnoutDesc').innerHTML = fateAnalysis.burnoutRisk > 70
+                ? '<span class="hidden-en">⚠️ HIGH RISK. Your energy burns bright but fast.</span><span class="hidden-cn">⚠️ 高风险。你的能量炽热但易耗。</span>'
+                : '<span class="hidden-en">Moderate risk. You need regular recovery cycles.</span><span class="hidden-cn">中等风险。需要定期恢复。</span>';
+
+            document.getElementById('intuitionScore').textContent = fateAnalysis.intuitionScore + '/100';
+            document.getElementById('intuitionDesc').innerHTML = fateAnalysis.intuitionScore > 70
+                ? '<span class="hidden-en">Your intuition is a superpower. Trust the whispers.</span><span class="hidden-cn">直觉是你的超能力。相信那些低语。</span>'
+                : '<span class="hidden-en">Good intuitive capacity. Meditate to strengthen it.</span><span class="hidden-cn">直觉能力不错。通过冥想增强。</span>';
+        }
+
+        function renderSoulCore(fateAnalysis) {
+            const core = SOUL_CORES[fateAnalysis.dayMasterElement][fateAnalysis.dayMasterYin];
+            document.getElementById('soulCoreName').textContent = core.name_en;
+            document.getElementById('soulCoreNameCN').textContent = core.name_cn;
+            document.getElementById('soulCoreDesc').textContent = core.desc_en;
+            document.getElementById('soulCoreDesc').innerHTML =
+                '<span class="hidden-en">' + core.desc_en + '</span>' +
+                '<span class="hidden-cn">' + core.desc_cn + '</span>';
+        }
+
+        function renderArchetype(fateAnalysis, wuxingCount, gender) {
+            const archetypeKey = fateAnalysis.waterRatio > 0.25 ? 'positive_seal'
+                                : fateAnalysis.fireRatio > 0.25 ? 'food_god'
+                                : 'direct_wealth';
+
+            let html = `<h4 class="text-xl font-bold text-d4af37 mb-4">
+                <span class="hidden-en">YOUR PRIMARY ARCHETYPE</span>
+                <span class="hidden-cn">你的主导原型</span>
+            </h4>
+            <div class="superpower mb-6">
+                <div class="superpower-label">✨ <span class="hidden-en">SUPERPOWER</span><span class="hidden-cn">超能力</span></div>
+                <p class="text-purple-200 mt-2">
+                    <span class="hidden-en">You excel at creating opportunities and bringing ideas to life. Your natural magnetism attracts the right people.</span>
+                    <span class="hidden-cn">你擅长创造机会，将想法落地成现实。你的自然魅力吸引志同道合的人。</span>
+                </p>
+            </div>
+            <div class="kryptonite">
+                <div class="kryptonite-label">⚡ <span class="hidden-en">SHADOW SIDE</span><span class="hidden-cn">心理陷阱</span></div>
+                <p class="text-purple-200 mt-2">
+                    <span class="hidden-en">You may struggle with follow-through and get scattered across too many projects.</span>
+                    <span class="hidden-cn">你可能会在执行力上有困难，容易被多个项目分散注意力。</span>
+                </p>
+            </div>`;
+            document.getElementById('archetypeContainer').innerHTML = html;
+        }
+
+        function renderLoveAnalysis(baziData, fateAnalysis, gender) {
+            const attachmentStyle = fateAnalysis.waterRatio > 0.3 ? 'anxious-preoccupied' : 'secure';
+
+            let html = `
+            <h4 class="text-xl font-bold text-d4af37 mb-6">
+                <span class="hidden-en">MODULE 3: ROMANTIC ATTACHMENT & SOUL-TIE MECHANICS</span>
+                <span class="hidden-cn">模块三：爱情依恋风格与灵魂连接机制</span>
+            </h4>
+
+            <div class="archetype-card mb-6">
+                <div class="archetype-title">
+                    <span class="hidden-en">Your Attachment Blueprint (Attachment Theory)</span>
+                    <span class="hidden-cn">你的依恋蓝图（依恋理论）</span>
+                </div>
+                <p class="text-purple-200 mt-4">
+                    <span class="hidden-en">
+                    ${attachmentStyle === 'anxious-preoccupied'
+                        ? "You are <strong>Anxious-Preoccupied</strong>: You crave deep emotional intimacy and fear abandonment. You tend to be hypervigilant in relationships, reading subtle cues and seeking constant reassurance. Your superpower is profound loyalty and emotional availability. Your shadow: you can become clingy or emotionally demanding, interpreting independence as rejection."
+                        : "You are <strong>Secure</strong>: You balance independence with intimacy naturally. You feel comfortable being both close and autonomous. You're not anxious about relationships but maintain healthy boundaries. You're the rare unicorn that therapists celebrate."}
+                    </span>
+                    <span class="hidden-cn">
+                    ${attachmentStyle === 'anxious-preoccupied'
+                        ? "你属于<strong>焦虑型（Anxious-Preoccupied）</strong>：你渴望深层的情感亲密，害怕被抛弃。你在关系中过度敏感，能读懂最微妙的线索，需要不断的确认。你的超能力是深厚的忠诚和情感可用性。你的阴影面：你可能会变得粘人或情感需求过度，将伴侣的独立解读为拒绝。"
+                        : "你属于<strong>安全型（Secure）</strong>：你自然地平衡独立与亲密。你既能亲近也能自主。你对关系没有焦虑，但会维持健康边界。你是治疗师都会庆祝的罕见独角兽。"}
+                    </span>
+                </p>
+            </div>
+
+            <div class="metric-card mb-6">
+                <div class="metric-label">
+                    <span class="hidden-en">🧲 The Twin Flame / Mirror Archetype: Who You're Magnetically Drawn To</span>
+                    <span class="hidden-cn">🧲 灵魂伴侣蓝图：你被什么能量的人吸引</span>
+                </div>
+                <div class="metric-description mt-4">
+                    <span class="hidden-en">
+                    Based on your five-element signature, you are magnetically drawn to partners who:
+                    <ul class="mt-3 ml-4 space-y-2">
+                        <li>• ${fateAnalysis.waterRatio > 0.25 ? "Have grounded, earth-like stability (they anchor your water mist into form)" : "Have emotional depth and intuitive understanding (they mirror your soul)"}</li>
+                        <li>• Offer the energy your chart lacks (your chart shows what you need externally to feel whole)</li>
+                        <li>• Challenge your growth patterns (the relationship that transforms you most isn't the easiest—it's the one that stretches you)</li>
+                    </ul>
+                    </span>
+                    <span class="hidden-cn">
+                    根据你的五行特征，你被什么能量的人吸引：
+                    <ul class="mt-3 ml-4 space-y-2">
+                        <li>• ${fateAnalysis.waterRatio > 0.25 ? "有着稳定、大地般的气质（他们把你的水雾凝聚成形状）" : "有情感深度和直觉理解力（他们映照你的灵魂）"}</li>
+                        <li>• 提供你命盘缺少的能量（你的缺失就是你需要外在寻求的）</li>
+                        <li>• 挑战你的成长模式（最能改变你的关系不是最容易的，而是最拉伸你的）</li>
+                    </ul>
+                    </span>
+                </div>
+            </div>
+
+            <div class="kryptonite mb-6">
+                <div class="kryptonite-label">
+                    <span class="hidden-en">🚨 Your Relationship Blind Spot (The Shadow Pattern)</span>
+                    <span class="hidden-cn">🚨 关系盲区（隐藏的心理模式）</span>
+                </div>
+                <div class="ritual-content mt-3">
+                    <span class="hidden-en">
+                    In intimate relationships, you unconsciously recreate patterns from your past. Here's the pattern you're likely stuck in:
+                    <br><br>
+                    <strong>The Cycle:</strong> You seek reassurance → Partner feels smothered → You panic → You withdraw or attack → Partner pulls away → Your fears confirm
+                    <br><br>
+                    <strong>How to Break It:</strong>
+                    <ol class="mt-3 ml-4 space-y-2 list-decimal">
+                        <li>Notice when you're seeking external validation instead of building internal security</li>
+                        <li>Before asking your partner for reassurance, ask yourself: "Am I feeling afraid or am I actually in danger?"</li>
+                        <li>Practice self-soothing: meditation, journaling, time alone with healthy activities</li>
+                        <li>Communicate your fears directly instead of testing your partner</li>
+                    </ol>
+                    </span>
+                    <span class="hidden-cn">
+                    在亲密关系中，你无意识地重复过去的模式。你可能陷入的模式是：
+                    <br><br>
+                    <strong>循环：</strong> 你寻求确认 → 伴侣感到窒息 → 你恐慌 → 你退缩或攻击 → 伴侣远离 → 你的恐惧得到确认
+                    <br><br>
+                    <strong>如何打破它：</strong>
+                    <ol class="mt-3 ml-4 space-y-2 list-decimal">
+                        <li>觉察你何时在寻求外部验证，而不是建立内部安全感</li>
+                        <li>在向伴侣要求确认前，问自己："我是害怕还是真的在危险中？"</li>
+                        <li>练习自我安抚：冥想、日记、独处时的健康活动</li>
+                        <li>直接表达你的恐惧，而不是测试伴侣</li>
+                    </ol>
+                    </span>
+                </div>
+            </div>
+
+            <div class="superpower">
+                <div class="superpower-label">
+                    <span class="hidden-en">💫 The Relationship Upgrade Path</span>
+                    <span class="hidden-cn">💫 关系升级路径</span>
+                </div>
+                <div class="ritual-content mt-3">
+                    <span class="hidden-en">To attract a secure, healthy relationship:</span>
+                    <span class="hidden-cn">要吸引一个安全、健康的关系：</span>
+                    <br>
+                    <strong><span class="hidden-en">1. Become your own secure base</span><span class="hidden-cn">1. 成为你自己的安全基地</span></strong>
+                    <span class="hidden-en">Build a life so fulfilling that a partner is a bonus, not a necessity. This energy shift is magnetic.</span>
+                    <span class="hidden-cn">建立一个如此充实的生活，以至于伴侣是加分项而不是必需品。这种能量转变是有吸引力的。</span>
+                    <br><br>
+                    <strong><span class="hidden-en">2. Heal your origin story</span><span class="hidden-cn">2. 疗愈你的起源故事</span></strong>
+                    <span class="hidden-en">Your attachment style was formed in childhood. Therapy, somatic work, or regression meditation can help rewire it.</span>
+                    <span class="hidden-cn">你的依恋风格在童年形成。治疗、身体工作或回归冥想可以帮助重新编程它。</span>
+                </div>
+            </div>
+            `;
+            document.getElementById('loveContainer').innerHTML = html;
+        }
+
+        function renderCareerAnalysis(wuxingCount, fateAnalysis) {
+            const careerType = wuxingCount.metal > wuxingCount.water ? 'value_builder' : 'entrepreneur';
+
+            let html = `
+            <h4 class="text-xl font-bold text-d4af37 mb-6">
+                <span class="hidden-en">MODULE 4: ABUNDANCE FREQUENCY & MANIFESTATION BLUEPRINT</span>
+                <span class="hidden-cn">模块四：财富吸引频率与显化蓝图</span>
+            </h4>
+
+            <div class="archetype-card mb-6">
+                <div class="archetype-title">
+                    <span class="hidden-en">${careerType === 'value_builder' ? 'The Master Value Builder' : 'The High-Stakes Entrepreneur'}</span>
+                    <span class="hidden-cn">${careerType === 'value_builder' ? '价值构建者' : '高风险创业家'}</span>
+                </div>
+                <p class="text-purple-200 mt-4">
+                    <span class="hidden-en">
+                    ${careerType === 'value_builder'
+                        ? "You build wealth through <strong>deep expertise, authority positioning, and compound growth</strong>. You're the type who becomes more valuable over time. Your genius is in mastery—you turn skills into assets. Your ideal income path: <strong>1) Build expertise → 2) Establish authority → 3) Premium pricing → 4) Passive income from intellectual property</strong>."
+                        : "You build wealth through <strong>opportunity spotting, rapid execution, and portfolio diversification</strong>. You're the type who sees gaps before they're obvious. Your genius is in pattern recognition and speed. Your ideal income path: <strong>1) Identify micro-niche → 2) Create MVP fast → 3) Validate demand → 4) Scale or pivot</strong>."}
+                    </span>
+                    <span class="hidden-cn">
+                    ${careerType === 'value_builder'
+                        ? "你通过<strong>深度专业知识、权威定位和复利增长</strong>来建立财富。你是那种随着时间推移变得更有价值的类型。你的天才在于精通——你把技能变成资产。你理想的收入路径：<strong>1) 建立专业知识 → 2) 确立权威地位 → 3) 高端定价 → 4) 知识产权的被动收入</strong>。"
+                        : "你通过<strong>机会识别、快速执行和投资组合多元化</strong>来建立财富。你是那种在机会明显化前就看到它的类型。你的天才在于模式识别和速度。你理想的收入路径：<strong>1) 识别微型壁龛 → 2) 快速创建MVP → 3) 验证需求 → 4) 规模化或转向</strong>。"}
+                    </span>
+                </p>
+            </div>
+
+            <div class="metric-card mb-6">
+                <div class="metric-label">
+                    <span class="hidden-en">🎯 Your Perfect Micro-Niches (Income Streams)</span>
+                    <span class="hidden-cn">🎯 你的完美微型职业赛道（收入流）</span>
+                </div>
+                <div class="metric-description mt-4">
+                    <span class="hidden-en">
+                    ${careerType === 'value_builder'
+                        ? "• <strong>Executive Coach</strong> - Premium 1-on-1 consulting where depth builds reputation<br/>• <strong>Technical Founder</strong> - Build SaaS, sell long-term contracts<br/>• <strong>Author/Thought Leader</strong> - Books, courses, speaking fees<br/>• <strong>Specialist Consultant</strong> - Deep expertise in AI, psychology, strategy<br/>• <strong>Investment Analyst</strong> - Build thesis-based investment models"
+                        : "• <strong>Solopreneur/Micro-Founder</strong> - Multiple small revenue streams, diverse portfolio<br/>• <strong>Digital Product Creator</strong> - Digital downloads, Gumroad, online courses<br/>• <strong>Web3/Crypto Operator</strong> - Fast-moving, high-risk/high-reward ecosystems<br/>• <strong>Creator Economy</strong> - TikTok, YouTube, Patreon-based revenue<br/>• <strong>Trading/Investing</strong> - Crypto, forex, options trading"}
+                    </span>
+                    <span class="hidden-cn">
+                    ${careerType === 'value_builder'
+                        ? "• <strong>执行教练</strong> - 高端1对1咨询，深度建立声誉<br/>• <strong>技术创始人</strong> - 构建SaaS，长期合同<br/>• <strong>作家/思想领袖</strong> - 书籍、课程、演讲费<br/>• <strong>专科顾问</strong> - AI、心理学、战略的深度专业知识<br/>• <strong>投资分析师</strong> - 构建基于论文的投资模型"
+                        : "• <strong>个体创业者</strong> - 多个小收入流，多元化投资组合<br/>• <strong>数字产品创作者</strong> - 数字下载、Gumroad、在线课程<br/>• <strong>Web3/加密操作员</strong> - 快速移动、高风险/高回报生态<br/>• <strong>创作者经济</strong> - TikTok、YouTube、Patreon支持<br/>• <strong>交易/投资</strong> - 加密、外汇、期权交易"}
+                    </span>
+                </div>
+            </div>
+
+            <div class="kryptonite mb-6">
+                <div class="kryptonite-label">
+                    <span class="hidden-en">💰 Your Money Manifestation Blocks (The Invisible Wealth Thieves)</span>
+                    <span class="hidden-cn">💰 你的财富显化阻碍（隐形的财富窃贼）</span>
+                </div>
+                <div class="ritual-content mt-3">
+                    <span class="hidden-en">
+                    <strong>Block #1: Imposter Syndrome</strong> - You don't believe you deserve premium pricing. You undercharge because deep down you think you're a fraud.<br/>
+                    <strong>Solution:</strong> Every time you're about to undercharge, stop and ask: "What belief made me do that?" Write it down. You're debugging your wealth code.<br/><br/>
+
+                    <strong>Block #2: Scarcity Mindset</strong> - You hold onto money too tightly, afraid to invest, afraid to give. Money is energy; it needs to flow.<br/>
+                    <strong>Solution:</strong> Practice "abundance micro-actions." Tip 50% more this week. Invest in one course. Give a gift unexpectedly.<br/><br/>
+
+                    <strong>Block #3: Comparison Trap</strong> - You measure success against others' highlight reels, making yourself feel perpetually behind.<br/>
+                    <strong>Solution:</strong> Stop following people who trigger envy. Measure success against past-you, not present-them.
+                    </span>
+                    <span class="hidden-cn">
+                    <strong>阻碍#1：冒充者综合征</strong> - 你不相信自己值得高端定价。你低价是因为深层认为自己是骗子。<br/>
+                    <strong>解决方案：</strong> 每当你要低价时，停下来问："什么信念让我这样做？"写下来。你在调试财富代码。<br/><br/>
+
+                    <strong>阻碍#2：匮乏心态</strong> - 你过度执着钱，害怕投资，害怕给予。金钱是能量，需要流动。<br/>
+                    <strong>解决方案：</strong> 练习"丰富微行动"。这周多给50%小费。投资一个课程。意外地送礼。<br/><br/>
+
+                    <strong>阻碍#3：比较陷阱</strong> - 你将成功与他人的亮点卷测量，使自己永远感到落后。<br/>
+                    <strong>解决方案：</strong> 停止关注引发嫉妒的人。将成功与过去的你相比，而不是现在的他们。
+                    </span>
+                </div>
+            </div>
+
+            <div class="superpower">
+                <div class="superpower-label">
+                    <span class="hidden-en">🧲 How to Activate Your Abundance Frequency Right Now</span>
+                    <span class="hidden-cn">🧲 立即激活你的财富频率</span>
+                </div>
+                <div class="ritual-content mt-3">
+                    <strong><span class="hidden-en">Action 1: Audit Your Money Story</span><span class="hidden-cn">行动1：审计你的金钱故事</span></strong>
+                    <span class="hidden-en">Write these answers: "My parents taught me money is ___. I believe I deserve ___ per year. The richest person I know ___." Your answers are your wealth ceiling.</span>
+                    <span class="hidden-cn">写下这些答案："我的父母教我金钱是___。我相信我值得每年___。我认识的最富有的人___。"你的答案是你的财富天花板。</span>
+                    <br><br>
+                    <strong><span class="hidden-en">Action 2: Start Before You're Ready</span><span class="hidden-cn">行动2：在准备好之前开始</span></strong>
+                    <span class="hidden-en">Money doesn't come to the prepared; it comes to the bold. Announce your side business, write your first article, post your first video. Done > Perfect.</span>
+                    <span class="hidden-cn">钱不是来给有准备的人，而是来给勇敢的人。宣布你的副业，写第一篇文章，发布第一个视频。做完 > 完美。</span>
+                </div>
+            </div>
+            `;
+            document.getElementById('careerContainer').innerHTML = html;
+        }
+
+        function renderCosmicSeasons(year) {
+            const currentYear = new Date().getFullYear();
+            const ageEstimate = currentYear - year;
+
+            const seasonData = ageEstimate < 20 ? {
+                name_en: 'Spring: The Foundation Year',
+                name_cn: '春季：基础年',
+                theme_en: 'You are building foundations. Everything shapes you now.',
+                theme_cn: '你在构建基础。一切都在塑造你。',
+                desc_en: 'You have NO permission to have it figured out. You\'re supposed to explore, fail, and experiment. This is your era of radical discovery. The question isn\'t "What should I do?" but "What interests me?" Follow curiosity, not convention.',
+                desc_cn: '你没有被要求搞清楚一切。你应该探索、失败和实验。这是你激进发现的时代。问题不是"我应该做什么？"而是"什么吸引我？"跟随好奇心，而不是习俗。',
+                focus_en: [
+                    '✨ Try different things without committing to any',
+                    '✨ Build diverse skills, not narrow specialization',
+                    '✨ Invest in your nervous system health (sleep, exercise, therapy)',
+                    '✨ Surround yourself with people who expand your worldview'
+                ],
+                focus_cn: [
+                    '✨ 尝试不同的事物，但不提交给任何事物',
+                    '✨ 建立多样化技能，而不是狭隘专业化',
+                    '✨ 投资你的神经系统健康（睡眠、运动、治疗）',
+                    '✨ 围绕自己与扩展你世界观的人'
+                ]
+            } : ageEstimate < 30 ? {
+                name_en: 'Solar Summer: Radical Visibility',
+                name_cn: '盛夏：极致显现',
+                theme_en: 'This is your visibility window. The universe is pushing you forward.',
+                theme_cn: '这是你的显现窗口。宇宙在推你向前。',
+                desc_en: 'This decade is your 10,000-hour mastery window. Forget balance—choose your ONE thing and obsess. Build an audience (1,000 true fans will sustain a career). Take public risk: publish, create, post, speak. The people who changed the world did it before age 35 because they were shameless.',
+                desc_cn: '这十年是你的一万小时精通窗口。忘记平衡——选择你的一件事并痴迷。建立受众（1000个真粉丝会维持职业生涯）。进行公开冒险：发布、创建、发布、演讲。改变世界的人在35岁之前做到了，因为他们无所谓。',
+                focus_en: [
+                    '🔥 Pick ONE skill/field and go deeper than 99% of people',
+                    '🔥 Build in public - document your learning journey',
+                    '🔥 Collect 1,000 true fans (quality over quantity)',
+                    '🔥 Say yes to every opportunity (narrow later in your 30s)'
+                ],
+                focus_cn: [
+                    '🔥 选择一项技能/领域，比99%的人都深入',
+                    '🔥 公开建设 - 记录你的学习之旅',
+                    '🔥 收集1000个真粉丝（质量胜于数量）',
+                    '🔥 对每个机会说"是"（在30多岁时缩小范围）'
+                ]
+            } : {
+                name_en: 'Autumn: Consolidation & Authority',
+                name_cn: '秋季：整合与权威',
+                theme_en: 'Harvest what you planted. Your wisdom now becomes valuable.',
+                theme_cn: '收获你种下的果实。你的智慧现在变得宝贵。',
+                desc_en: 'Your superpower now is depth and decision-making. You\'ve seen patterns others haven\'t. STOP chasing novelty. Consolidate: narrow your focus, go 10x deeper in your 1 main area. Your value isn\'t in doing more—it\'s in knowing more. Mentor others. Build systems and leverage.',
+                desc_cn: '你的超能力现在是深度和决策能力。你看到了其他人没有看到的模式。停止追求新奇。整合：缩小焦点，在你的一个主要领域深入10倍。你的价值不在于做更多——而在于知道更多。指导他人。建立系统和杠杆。',
+                focus_en: [
+                    '🌟 Ruthlessly eliminate low-impact activities',
+                    '🌟 Build legacy projects (not side hustles)',
+                    '🌟 Mentor the next generation',
+                    '🌟 Create systems that work without you'
+                ],
+                focus_cn: [
+                    '🌟 无情地消除低影响活动',
+                    '🌟 构建遗留项目（不是副业）',
+                    '🌟 指导下一代',
+                    '🌟 创建无需你的系统'
+                ]
+            };
+
+            let html = `
+            <h4 class="text-xl font-bold text-d4af37 mb-6">
+                <span class="hidden-en">MODULE 5: COSMIC SEASONS - YOUR LIFE TIMELINE BLUEPRINT</span>
+                <span class="hidden-cn">模块五：宇宙季节 - 你的人生时间线蓝图</span>
+            </h4>
+
+            <div class="soul-core-card">
+                <div class="soul-core-title">
+                    <span class="hidden-en">${seasonData.name_en}</span>
+                    <span class="hidden-cn">${seasonData.name_cn}</span>
+                </div>
+                <div class="soul-core-desc">
+                    <span class="hidden-en">${seasonData.theme_en}</span>
+                    <span class="hidden-cn">${seasonData.theme_cn}</span>
+                </div>
+            </div>
+
+            <div class="archetype-card mb-6 mt-6">
+                <div class="archetype-title">
+                    <span class="hidden-en">What This Season Means For You</span>
+                    <span class="hidden-cn">这个季节对你意味着什么</span>
+                </div>
+                <p class="text-purple-200 mt-4">
+                    <span class="hidden-en">${seasonData.desc_en}</span>
+                    <span class="hidden-cn">${seasonData.desc_cn}</span>
+                </p>
+            </div>
+
+            <div class="metric-card mb-6">
+                <div class="metric-label">
+                    <span class="hidden-en">🎯 Your Focus Areas This Season</span>
+                    <span class="hidden-cn">🎯 这个季节的焦点领域</span>
+                </div>
+                <div class="metric-description mt-4">
+                    <span class="hidden-en">${seasonData.focus_en.join('<br>')}</span>
+                    <span class="hidden-cn">${seasonData.focus_cn.join('<br>')}</span>
+                </div>
+            </div>
+
+            <div class="superpower">
+                <div class="superpower-label">
+                    <span class="hidden-en">⚡ This Year's Transit Energy (Flow Forecast)</span>
+                    <span class="hidden-cn">⚡ 今年的流年能量预报</span>
+                </div>
+                <div class="ritual-content mt-3">
+                    <span class="hidden-en">
+                    Your current year brings energy of <strong>expansion and testing</strong>. This is a time when:
+                    <br><br>
+                    ✨ <strong>Alignment Windows:</strong> Opportunities for partnerships, collaborations, and major launches appear naturally<br/>
+                    ✨ <strong>Challenge Periods:</strong> Expect restructuring. Old patterns that don't serve you will fall away (even if it feels chaotic)<br/>
+                    ✨ <strong>Growth Catalyst:</strong> The discomfort you feel isn't punishment—it's evolution. Lean into it.
+                    </span>
+                    <span class="hidden-cn">
+                    你当前的一年带来<strong>扩展和测试</strong>的能量。这是一个时期：
+                    <br><br>
+                    ✨ <strong>对齐窗口：</strong> 伙伴关系、合作和重大推出的机会自然出现<br/>
+                    ✨ <strong>挑战期：</strong> 期待重组。不为你服务的旧模式将消失（即使感觉混乱）<br/>
+                    ✨ <strong>增长催化剂：</strong> 你感到的不适不是惩罚——而是进化。倾向于它。
+                    </span>
+                </div>
+            </div>
+            `;
+            document.getElementById('cosmicContainer').innerHTML = html;
+        }
+
+        function renderRituals(fateAnalysis) {
+            const colors = fateAnalysis.waterRatio > 0.25 ? {
+                hex: ['#1a0a2e', '#0a4d7a', '#d4af37'],
+                names_en: ['Deep Navy', 'Ocean Depth', 'Gold'],
+                names_cn: ['深海蓝', '海洋深度', '黄金']
+            } : fateAnalysis.fireRatio > 0.25 ? {
+                hex: ['#6a0572', '#d4af37', '#ff6b35'],
+                names_en: ['Mystic Purple', 'Gold', 'Fire Orange'],
+                names_cn: ['神秘紫', '黄金', '火焰橙']
+            } : {
+                hex: ['#ffffff', '#d4af37', '#808080'],
+                names_en: ['Pristine White', 'Gold', 'Silver'],
+                names_cn: ['纯白', '黄金', '银色']
+            };
+
+            const rituals = fateAnalysis.waterRatio > 0.25 ? {
+                en: [
+                    '<strong>Morning Ritual:</strong> Sit by water (ocean, lake, shower) for 5 minutes. Water magnifies intuition. Visualize your intention dissolving into the water like ink.',
+                    '<strong>Evening Ritual:</strong> Journaling with intention. Write what you\'re releasing, not manifesting. Water people heal through letting go.',
+                    '<strong>Weekly Ritual:</strong> Float tank or sensory deprivation. Your superpower is perceiving the unseen. Silence amplifies this.'
+                ],
+                cn: [
+                    '<strong>晨间仪式：</strong> 在水边（海洋、湖泊、淋浴）坐5分钟。水放大直觉。想象你的意图像墨水一样溶入水中。',
+                    '<strong>晚间仪式：</strong> 带有意图的日记。写下你要释放的，而不是显化的。水人通过放手来疗愈。',
+                    '<strong>每周仪式：</strong> 浮感舱或感觉剥夺。你的超能力是感知无形。沉默放大这一点。'
+                ]
+            } : fateAnalysis.fireRatio > 0.25 ? {
+                en: [
+                    '<strong>Morning Ritual:</strong> Power posing for 2 minutes. Stand in a "victory" pose, arms raised. This activates your magnetic field. Say your intention OUT LOUD.',
+                    '<strong>Movement Ritual:</strong> Dance, run, or any high-energy activity for 15+ minutes. Your energy NEEDS physical expression.',
+                    '<strong>Evening Ritual:</strong> Gratitude sharing. Tell someone else something you\'re grateful for. Fire people charge by radiating.'
+                ],
+                cn: [
+                    '<strong>晨间仪式：</strong> 权力姿态2分钟。双臂抬起站立。这激活你的磁场。大声说出你的意图。',
+                    '<strong>运动仪式：</strong> 跳舞、跑步或任何高能量活动15分钟以上。你的能量需要物理表达。',
+                    '<strong>晚间仪式：</strong> 感恩分享。告诉别人你感谢什么。火人通过辐射来充电。'
+                ]
+            } : {
+                en: [
+                    '<strong>Morning Grounding:</strong> Barefoot on earth for 10 minutes (grass, soil, sand). Direct earth contact resets your energy to the ground state.',
+                    '<strong>Minimalism Ritual:</strong> Remove 5 items from your space weekly. Physical decluttering = energetic decluttering. Chaos outside mirrors chaos inside.',
+                    '<strong>Anchor Ritual:</strong> Gratitude list every morning. Write 3 specific things you\'re grateful for (not generic—SPECIFIC). This rewires your brain to abundance.'
+                ],
+                cn: [
+                    '<strong>晨间接地：</strong> 赤脚在地上10分钟（草、土、沙）。直接接触地球将你的能量重置为地面状态。',
+                    '<strong>极简仪式：</strong> 每周从你的空间移除5个物品。物理整理 = 能量整理。外部混乱反映内部混乱。',
+                    '<strong>锚定仪式：</strong> 每天早上感恩清单。写下3个你感谢的具体事情（不是通用的——具体的）。这将你的大脑重新连接到丰度。'
+                ]
+            };
+
+            let html = `
+            <h4 class="text-xl font-bold text-d4af37 mb-6">
+                <span class="hidden-en">MODULE 6: HIGH-VIBE RITUALS & ENERGY BIOHACKING</span>
+                <span class="hidden-cn">模块六：高频率仪式与能量改运秘法</span>
+            </h4>
+
+            <div class="metric-card mb-6">
+                <div class="metric-label">
+                    <span class="hidden-en">🌈 YOUR ACTIVATION COLOR PALETTE</span>
+                    <span class="hidden-cn">🌈 你的激活色系</span>
+                </div>
+                <div class="flex justify-center gap-6 mt-6 mb-4">
+                    ${colors.hex.map((color, i) => `
+                        <div class="text-center">
+                            <div class="color-swatch" style="background-color: ${color}; width: 60px; height: 60px; margin: 0 auto 12px;"></div>
+                            <p class="text-sm font-semibold">
+                                <span class="hidden-en">${colors.names_en[i]}</span>
+                                <span class="hidden-cn">${colors.names_cn[i]}</span>
+                            </p>
+                        </div>
+                    `).join('')}
+                </div>
+                <p class="text-purple-300 text-center italic mt-4">
+                    <span class="hidden-en">Wear these colors, decorate your space, use as your phone wallpaper. Colors are electromagnetic frequencies that activate your energy field.</span>
+                    <span class="hidden-cn">穿着这些颜色、装饰你的空间、用作你的手机壁纸。颜色是激活你能量场的电磁频率。</span>
+                </p>
+            </div>
+
+            <div class="archetype-card mb-6">
+                <div class="archetype-title">
+                    <span class="hidden-en">🏡 Micro-Space Feng Shui (Desk Energy Alignment)</span>
+                    <span class="hidden-cn">🏡 微型办公室能量对齐</span>
+                </div>
+                <p class="text-purple-200 mt-4">
+                    <span class="hidden-en">
+                    ${fateAnalysis.waterRatio > 0.25
+                        ? "<strong>North Sector:</strong> Place black tourmaline or blue fluorite. Add a small water fountain or aquarium if possible. Water + Stone = amplified intuition.<br/><strong>Workspace Vibe:</strong> Low lighting, nature sounds, minimal clutter. You think best in calm environments."
+                        : fateAnalysis.fireRatio > 0.25
+                        ? "<strong>South Sector:</strong> Red or orange object (candle, crystal, artwork). Sunlight exposure if possible. Light = visibility activation.<br/><strong>Workspace Vibe:</strong> Bright, energetic, with images that inspire. You work best when you FEEL the energy."
+                        : "<strong>East Sector:</strong> Green plant (living wood element). Keep this area clean and organized. Chaos in your space = chaos in your mind.<br/><strong>Workspace Vibe:</strong> Organized, calm, with natural materials. Invest in ergonomic setup."}
+                    </span>
+                    <span class="hidden-cn">
+                    ${fateAnalysis.waterRatio > 0.25
+                        ? "<strong>北方区域：</strong> 放置黑电气石或蓝荧石。如果可能，添加小水喷泉或鱼缸。水+石 = 放大的直觉。<br/><strong>工作空间氛围：</strong> 低照度、自然声音、最少混乱。你在平静的环境中思考最好。"
+                        : fateAnalysis.fireRatio > 0.25
+                        ? "<strong>南方区域：</strong> 红色或橙色物体（蜡烛、水晶、艺术品）。如果可能，阳光照射。光 = 可见性激活。<br/><strong>工作空间氛围：</strong> 明亮、充满活力，带有激励的图像。当你感受能量时，你最好地工作。"
+                        : "<strong>东方区域：</strong> 绿色植物（生活木元素）。保持这个区域干净整洁。你的空间混乱 = 你的思想混乱。<br/><strong>工作空间氛围：</strong> 有组织的、平静的、天然材料的。投资人体工学设置。"}
+                    </span>
+                </p>
+            </div>
+
+            <div class="metric-card mb-6">
+                <div class="metric-label">
+                    <span class="hidden-en">✨ YOUR 5-MINUTE DAILY ACTIVATION RITUAL</span>
+                    <span class="hidden-cn">✨ 你的5分钟日常激活仪式</span>
+                </div>
+                <div class="metric-description mt-4 space-y-4">
+                    ${rituals.en.map((ritual, i) => `
+                        <div>
+                            <span class="hidden-en">${ritual}</span>
+                            <span class="hidden-cn">${rituals.cn[i]}</span>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+
+            <div class="superpower">
+                <div class="superpower-label">
+                    <span class="hidden-en">🔮 The 90-Day Transformation Protocol</span>
+                    <span class="hidden-cn">🔮 90天蜕变协议</span>
+                </div>
+                <div class="ritual-content mt-3">
+                    <span class="hidden-en">
+                    <strong>Week 1-2: Foundation</strong> - Do the daily ritual without missing a day. This signals commitment to yourself and the universe.<br/><br/>
+                    <strong>Week 3-6: Layering</strong> - Add the weekly/monthly rituals. Track how you feel. Notice shifts in energy, synchronicities, and opportunities.<br/><br/>
+                    <strong>Week 7-12: Integration</strong> - The rituals should feel natural now, not forced. You've rewired your nervous system. New opportunities magnetize to you automatically.<br/><br/>
+                    <strong>After 90 Days:</strong> You'll be living in a completely different frequency. What felt impossible before is now normal. This is what energy work does—it's not magic, it's physics.
+                    </span>
+                    <span class="hidden-cn">
+                    <strong>第1-2周：基础</strong> - 每天做仪式，不要错过一天。这表明你对自己和宇宙的承诺。<br/><br/>
+                    <strong>第3-6周：分层</strong> - 添加每周/每月仪式。追踪你的感觉。注意能量、同步性和机会的转变。<br/><br/>
+                    <strong>第7-12周：整合</strong> - 仪式现在应该感到自然，而不是被强迫。你已经重新连接了你的神经系统。新机会自动吸引到你。<br/><br/>
+                    <strong>90天后：</strong> 你将以完全不同的频率生活。之前感到不可能的现在很正常。这就是能量工作所做的——不是魔术，而是物理学。
+                    </span>
+                </div>
+            </div>
+            `;
+            document.getElementById('ritualContainer').innerHTML = html;
+        }
+
+        // ===== FORM SUBMISSION =====
+        document.getElementById('baziForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const name = document.getElementById('userName').value.trim();
+            const year = parseInt(document.getElementById('birthYear').value);
+            const month = parseInt(document.getElementById('birthMonth').value);
+            const day = parseInt(document.getElementById('birthDay').value);
+            const hour = parseInt(document.getElementById('birthHour').value);
+            const gender = document.querySelector('input[name="gender"]:checked').value;
+
+            if (!name || !year || !month || !day || hour === '' || !gender) {
+                document.getElementById('errorText').innerHTML =
+                    '<span class="hidden-en">Please complete all fields</span><span class="hidden-cn">请完整填写所有信息</span>';
+                document.getElementById('errorContainer').classList.remove('hidden');
+                return;
+            }
+
+            document.getElementById('formContainer').classList.add('hidden');
+            document.getElementById('loadingContainer').classList.remove('hidden');
+
+            setTimeout(() => {
+                try {
+                    const baziData = getGanZhi(year, month, day, hour);
+                    const wuxingCount = countWuxing(baziData);
+                    const fateAnalysis = analyzeFate(baziData, wuxingCount);
+
+                    renderEnergyMatrix(wuxingCount, fateAnalysis);
+                    renderVibeMetrics(fateAnalysis);
+                    renderSoulCore(fateAnalysis);
+                    renderArchetype(fateAnalysis, wuxingCount, gender);
+                    renderLoveAnalysis(baziData, fateAnalysis, gender);
+                    renderCareerAnalysis(wuxingCount, fateAnalysis);
+                    renderCosmicSeasons(year);
+                    renderRituals(fateAnalysis);
+
+                    document.getElementById('loadingContainer').classList.add('hidden');
+                    document.getElementById('resultContainer').classList.remove('hidden');
+
+                    setTimeout(() => {
+                        document.getElementById('resultContainer').scrollIntoView({ behavior: 'smooth' });
+                    }, 300);
+                } catch (error) {
+                    console.error(error);
+                    document.getElementById('errorText').innerHTML =
+                        '<span class="hidden-en">Calculation error: ' + error.message + '</span><span class="hidden-cn">计算错误: ' + error.message + '</span>';
+                    document.getElementById('errorContainer').classList.remove('hidden');
+                    document.getElementById('formContainer').classList.remove('hidden');
+                    document.getElementById('loadingContainer').classList.add('hidden');
+                }
+            }, 1500);
+        });
+    </script>
+</body>
+</html>

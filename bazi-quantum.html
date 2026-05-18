@@ -1,0 +1,1140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>✨ Bazi Quantum - Birth Chart Reading</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Montserrat:wght@300;400;500;600&display=swap');
+
+        * {
+            font-family: 'Montserrat', sans-serif;
+            color: #e0d5c7;
+        }
+
+        .title-font {
+            font-family: 'Cinzel', serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0a0a1f 0%, #1a0a2e 25%, #2d0a4e 50%, #1a0a2e 75%, #0a0a1f 100%);
+            background-attachment: fixed;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                radial-gradient(2px 2px at 20px 30px, #eee, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 60px 70px, #fff, rgba(0,0,0,0)),
+                radial-gradient(1px 1px at 50px 50px, #fff, rgba(0,0,0,0)),
+                radial-gradient(1px 1px at 130px 80px, #fff, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 90px 10px, #fff, rgba(0,0,0,0));
+            background-size: 200px 200px;
+            animation: twinkle 5s infinite;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.5;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.8; }
+        }
+
+        .content-wrapper {
+            position: relative;
+            z-index: 1;
+        }
+
+        .info-card {
+            background: rgba(26, 10, 46, 0.8);
+            border: 2px solid #d4af37;
+            border-radius: 12px;
+            box-shadow: 0 0 30px rgba(212, 175, 55, 0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .input-mystical {
+            background: rgba(106, 5, 114, 0.2);
+            border: 2px solid #6a0572;
+            color: #fff;
+            transition: all 0.3s ease;
+        }
+
+        .input-mystical:focus {
+            border-color: #d4af37;
+            background: rgba(106, 5, 114, 0.3);
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.3);
+            outline: none;
+        }
+
+        .btn-mystical {
+            background: linear-gradient(135deg, #6a0572 0%, #8b1ba8 100%);
+            box-shadow: 0 0 20px rgba(106, 5, 114, 0.5);
+            transition: all 0.3s ease;
+        }
+
+        .btn-mystical:hover {
+            box-shadow: 0 0 40px rgba(106, 5, 114, 0.8),
+                        0 0 60px rgba(212, 175, 55, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #d4af37, #8b1ba8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .spinner {
+            border: 4px solid rgba(212, 175, 55, 0.3);
+            border-top: 4px solid #d4af37;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .metric-card {
+            background: rgba(106, 5, 114, 0.3);
+            border-left: 4px solid #d4af37;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .metric-label {
+            color: #d4af37;
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+        }
+
+        .metric-value {
+            color: #e0d5c7;
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .metric-description {
+            color: #c8a882;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .soul-core-card {
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.1), rgba(106, 5, 114, 0.2));
+            border: 2px solid #d4af37;
+            padding: 32px;
+            border-radius: 12px;
+            text-align: center;
+            margin: 24px 0;
+        }
+
+        .soul-core-title {
+            color: #d4af37;
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .soul-core-name {
+            color: #8b1ba8;
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 16px;
+            font-style: italic;
+        }
+
+        .soul-core-desc {
+            color: #e0d5c7;
+            font-size: 1.1rem;
+            line-height: 1.8;
+        }
+
+        .archetype-card {
+            background: rgba(26, 10, 46, 0.8);
+            border: 2px solid #d4af37;
+            padding: 24px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .archetype-title {
+            color: #d4af37;
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 12px;
+        }
+
+        .superpower {
+            background: rgba(74, 222, 128, 0.1);
+            border-left: 4px solid #4ade80;
+            padding: 12px;
+            margin-bottom: 12px;
+            border-radius: 4px;
+        }
+
+        .superpower-label {
+            color: #4ade80;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+
+        .kryptonite {
+            background: rgba(239, 68, 68, 0.1);
+            border-left: 4px solid #ef4444;
+            padding: 12px;
+            margin-bottom: 12px;
+            border-radius: 4px;
+        }
+
+        .kryptonite-label {
+            color: #ef4444;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+
+        .radar-container {
+            background: rgba(26, 10, 46, 0.8);
+            border: 2px solid #d4af37;
+            padding: 24px;
+            border-radius: 12px;
+            margin: 24px 0;
+        }
+
+        .module-title {
+            color: #d4af37;
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin: 40px 0 20px 0;
+            padding-bottom: 12px;
+            border-bottom: 2px solid rgba(212, 175, 55, 0.3);
+        }
+
+        .ritual-box {
+            background: rgba(106, 5, 114, 0.3);
+            border-left: 4px solid #d4af37;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+        }
+
+        .ritual-title {
+            color: #d4af37;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .ritual-content {
+            color: #e0d5c7;
+            line-height: 1.6;
+        }
+
+        .color-swatch {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            margin: 0 8px;
+            border: 2px solid #d4af37;
+        }
+
+        h4 {
+            color: #d4af37 !important;
+        }
+
+        p, div, span, li {
+            color: #e0d5c7 !important;
+        }
+
+        .text-purple-200, .text-purple-300 {
+            color: #e0d5c7 !important;
+        }
+
+        @media (max-width: 768px) {
+            .module-title {
+                font-size: 1.3rem;
+            }
+            .soul-core-name {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="content-wrapper min-h-screen py-8 px-4">
+        <div class="max-w-6xl mx-auto">
+            <!-- Header -->
+            <div class="text-center mb-12">
+                <h1 class="title-font text-6xl md:text-7xl font-bold mb-3 gradient-text">✨ BAZI QUANTUM ✨</h1>
+                <p class="text-purple-300 text-lg">Birth Chart AI | Energy Matrix | Life Alignment Protocol</p>
+            </div>
+
+            <!-- 表单 -->
+            <div class="info-card p-8 mb-8" id="formContainer">
+                <form id="baziForm" class="space-y-6">
+                    <div>
+                        <label class="block text-purple-200 mb-2 font-semibold">YOUR NAME</label>
+                        <input type="text" id="userName" placeholder="Enter your name..." class="input-mystical w-full px-4 py-3 rounded-lg" required>
+                    </div>
+
+                    <div>
+                        <label class="block text-purple-200 mb-3 font-semibold">BIRTH DATE & TIME (Gregorian Calendar)</label>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                            <div>
+                                <label class="text-sm text-purple-300 mb-1 block">YEAR</label>
+                                <input type="number" id="birthYear" placeholder="1990" min="1900" max="2024" class="input-mystical w-full px-4 py-3 rounded-lg" required>
+                            </div>
+                            <div>
+                                <label class="text-sm text-purple-300 mb-1 block">MONTH</label>
+                                <input type="number" id="birthMonth" placeholder="1-12" min="1" max="12" class="input-mystical w-full px-4 py-3 rounded-lg" required>
+                            </div>
+                            <div>
+                                <label class="text-sm text-purple-300 mb-1 block">DAY</label>
+                                <input type="number" id="birthDay" placeholder="1-31" min="1" max="31" class="input-mystical w-full px-4 py-3 rounded-lg" required>
+                            </div>
+                            <div>
+                                <label class="text-sm text-purple-300 mb-1 block">HOUR (Chinese)</label>
+                                <select id="birthHour" class="input-mystical w-full px-4 py-3 rounded-lg" required>
+                                    <option value="">Select Hour</option>
+                                    <option value="0">Zi (23-1)</option>
+                                    <option value="1">Chou (1-3)</option>
+                                    <option value="2">Yin (3-5)</option>
+                                    <option value="3">Mao (5-7)</option>
+                                    <option value="4">Chen (7-9)</option>
+                                    <option value="5">Si (9-11)</option>
+                                    <option value="6">Wu (11-13)</option>
+                                    <option value="7">Wei (13-15)</option>
+                                    <option value="8">Shen (15-17)</option>
+                                    <option value="9">You (17-19)</option>
+                                    <option value="10">Xu (19-21)</option>
+                                    <option value="11">Hai (21-23)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-purple-200 mb-3 font-semibold">GENDER</label>
+                        <div class="flex gap-4">
+                            <label class="flex items-center cursor-pointer">
+                                <input type="radio" name="gender" value="male" class="mr-2" required>
+                                <span class="text-purple-200">♂ MALE</span>
+                            </label>
+                            <label class="flex items-center cursor-pointer">
+                                <input type="radio" name="gender" value="female" class="mr-2" required>
+                                <span class="text-purple-200">♀ FEMALE</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-mystical w-full py-4 text-white font-bold text-lg rounded-lg">
+                        🔮 GENERATE QUANTUM CHART
+                    </button>
+                </form>
+            </div>
+
+            <!-- Loading -->
+            <div id="loadingContainer" class="hidden text-center mb-8">
+                <div class="spinner mx-auto mb-4"></div>
+                <p class="text-purple-300 text-lg">Quantum entanglement in progress...</p>
+            </div>
+
+            <!-- Results -->
+            <div id="resultContainer" class="hidden">
+                <!-- MODULE 1: ENERGY MATRIX & VIBE METRICS -->
+                <h2 class="module-title">MODULE 1: ENERGY MATRIX</h2>
+
+                <div class="soul-core-card">
+                    <div class="soul-core-title">YOUR SOUL CORE ARCHETYPE</div>
+                    <div class="soul-core-name" id="soulCoreName">—</div>
+                    <div class="soul-core-desc" id="soulCoreDesc">—</div>
+                </div>
+
+                <!-- Energy Breakdown -->
+                <div class="info-card p-8 mb-8">
+                    <h3 class="text-2xl font-bold gradient-text mb-8">THE ENERGY BREAKDOWN</h3>
+                    <div id="energyBreakdownContainer" class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div id="radarChartContainer" class="radar-container">
+                            <canvas id="radarChart"></canvas>
+                        </div>
+                        <div id="energyBarsContainer" class="space-y-4">
+                            <!-- Will be filled by JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Vibe Metrics -->
+                <div class="info-card p-8 mb-8">
+                    <h3 class="text-2xl font-bold gradient-text mb-8">THE VIBE METRICS (Core Spiritual Indicators)</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="metric-card">
+                            <div class="metric-label">GROUNDING CAPACITY</div>
+                            <div class="metric-value" id="groundingScore">0/100</div>
+                            <div class="metric-description" id="groundingDesc">—</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-label">BURNOUT RISK</div>
+                            <div class="metric-value" id="burnoutScore">0/100</div>
+                            <div class="metric-description" id="burnoutDesc">—</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-label">INTUITION SCORE</div>
+                            <div class="metric-value" id="intuitionScore">0/100</div>
+                            <div class="metric-description" id="intuitionDesc">—</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MODULE 2: CORE ARCHETYPES & SHADOW -->
+                <h2 class="module-title">MODULE 2: CORE ARCHETYPE & PSYCHOLOGY</h2>
+                <div id="archetypeContainer" class="info-card p-8 mb-8"></div>
+
+                <!-- MODULE 3: LOVE & ATTACHMENT -->
+                <h2 class="module-title">MODULE 3: ROMANTIC ALIGNMENT & ATTACHMENT</h2>
+                <div class="info-card p-8 mb-8">
+                    <div id="loveContainer"></div>
+                </div>
+
+                <!-- MODULE 4: CAREER & MANIFESTATION -->
+                <h2 class="module-title">MODULE 4: ABUNDANCE FREQUENCY & CAREER MANIFESTATION</h2>
+                <div class="info-card p-8 mb-8">
+                    <div id="careerContainer"></div>
+                </div>
+
+                <!-- MODULE 5: COSMIC SEASONS -->
+                <h2 class="module-title">MODULE 5: COSMIC SEASONS (Your Life Timeline)</h2>
+                <div class="info-card p-8 mb-8">
+                    <div id="cosmicContainer"></div>
+                </div>
+
+                <!-- MODULE 6: ENERGY BIOHACKING -->
+                <h2 class="module-title">MODULE 6: HIGH-VIBE RITUALS & ENERGY BIOHACKING</h2>
+                <div class="info-card p-8 mb-8">
+                    <div id="ritualContainer"></div>
+                </div>
+
+                <!-- Restart Button -->
+                <button onclick="location.reload()" class="btn-mystical w-full py-3 text-white font-bold rounded-lg mt-12">
+                    🔄 NEW QUANTUM READING
+                </button>
+            </div>
+
+            <!-- Error -->
+            <div id="errorContainer" class="hidden bg-red-900 bg-opacity-50 border border-red-500 rounded-lg p-6 text-red-200">
+                <p id="errorText"></p>
+                <button onclick="document.getElementById('errorContainer').classList.add('hidden')" class="mt-4 px-4 py-2 bg-red-700 hover:bg-red-600 rounded-lg">
+                    CLOSE
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script>
+        // ===== CONSTANTS & DATA =====
+        const TIAN_GAN = ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸'];
+        const DI_ZHI = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
+
+        const WUXING_MAP = {
+            甲: 'wood', 乙: 'wood',
+            丙: 'fire', 丁: 'fire',
+            戊: 'earth', 己: 'earth',
+            庚: 'metal', 辛: 'metal',
+            壬: 'water', 癸: 'water'
+        };
+
+        const WUXING_ZHI = {
+            子: 'water', 丑: 'earth',
+            寅: 'wood', 卯: 'wood',
+            辰: 'earth', 巳: 'fire',
+            午: 'fire', 未: 'earth',
+            申: 'metal', 酉: 'metal',
+            戌: 'earth', 亥: 'water'
+        };
+
+        // Soul Core Archetypes - High-Vibe Language
+        const SOUL_CORES = {
+            wood: {
+                yang: {
+                    name: "The Ancient Redwood",
+                    desc: "Yang Wood embodies the pioneering force of ancient redwoods—standing tall, pushing toward expansion, commanding respect through sheer vitality. You are built for growth, innovation, and breaking new ground. Your energy is uplifting, magnetic, and naturally draws others into your vision."
+                },
+                yin: {
+                    name: "The Verdant Vine",
+                    desc: "Yin Wood flows like gentle vines, rooted yet flexible, seeking nourishment and connection. Your superpower is adaptability—you bend without breaking. You thrive in collaboration, nurturing environments where you can grow alongside others."
+                }
+            },
+            fire: {
+                yang: {
+                    name: "The Wildfire Phoenix",
+                    desc: "Yang Fire blazes with passion and presence—a phoenix reborn from ashes. You radiate charisma, illuminate dark spaces, and burn with purposeful intensity. Your natural magnetism makes you a born entertainer, visionary, or catalyst for transformation."
+                },
+                yin: {
+                    name: "The Cosmic Torch",
+                    desc: "Yin Fire glows like a cosmic torch—spiritual, introspective, burning gently from within. You perceive nuances others miss. Your warmth is intimate rather than explosive; you illuminate hearts and minds through depth, not volume."
+                }
+            },
+            earth: {
+                yang: {
+                    name: "The Ancient Mountain",
+                    desc: "Yang Earth is the bedrock—solid, grounded, commanding. Mountains don't move; they endure. You are the dependable anchor in chaos, the builder of empires. Your gift is manifestation: turning abstract vision into tangible reality."
+                },
+                yin: {
+                    name: "The Sacred Garden",
+                    desc: "Yin Earth is fertile soil, nurturing life from beneath. You possess quiet power—the ability to create conditions for growth. Your sensitivity to others' needs makes you a natural healer, counselor, or facilitator of collective harmony."
+                }
+            },
+            metal: {
+                yang: {
+                    name: "The Tempered Blade",
+                    desc: "Yang Metal is a sword forged in fire—sharp, decisive, cutting through illusion. You are a master of precision and standards. Your clarity is uncompromising; you excel at crystallizing chaos into elegant systems."
+                },
+                yin: {
+                    name: "The Luminous Pearl",
+                    desc: "Yin Metal is a pearl—precious, refined, introspective brilliance. You possess refined taste, emotional intelligence, and the ability to see beauty in subtle forms. Your strength lies in discernment and spiritual refinement."
+                }
+            },
+            water: {
+                yang: {
+                    name: "The Restless Ocean",
+                    desc: "Yang Water is the ocean—boundless, powerful, ever-moving. You are driven by ambition and emotional depth. Your wisdom comes from witnessing countless cycles; you understand human nature at its core."
+                },
+                yin: {
+                    name: "The Cosmic Mist",
+                    desc: "Yin Water is mystical mist—ephemeral, intuitive, formless yet containing infinite potential. You are deeply spiritual, psychic-sensitive, adapting to any container while retaining your essence. Your superpower is understanding the unseen."
+                }
+            }
+        };
+
+        // Primary Archetype Mapping (十神 to Jungian)
+        const ARCHETYPE_MAP = {
+            food_god: {
+                name: "The Visionary",
+                archetype: "The Creator & Innovator",
+                superpower: [
+                    "Innate creative genius—you solve problems by thinking sideways",
+                    "Natural expressiveness—writing, speaking, art pour from you effortlessly",
+                    "Optimism as a superpower—you inspire others to believe in impossible futures"
+                ],
+                kryptonite: [
+                    "Analysis paralysis—so many ideas that execution suffers",
+                    "People-pleasing tendency—you dilute your message trying to appeal to everyone",
+                    "Scattered energy—jumping between projects before mastering any"
+                ]
+            },
+            wounded_officer: {
+                name: "The Rebel",
+                archetype: "The Revolutionary & Disruptor",
+                superpower: [
+                    "You see what others refuse to see—blind spots become your superpower",
+                    "Fearless speech—you say what needs saying, consequences be damned",
+                    "Unconventional problem-solving—traditional rules don't apply to you"
+                ],
+                kryptonite: [
+                    "Self-sabotage tendency—your words can cut deep, alienating potential allies",
+                    "Perfectionism mask—criticism feels like personal attack because your work IS you",
+                    "Burnout from non-conformity—constant friction with the status quo exhausts you"
+                ]
+            },
+            official: {
+                name: "The Sovereign",
+                archetype: "The Natural Leader & Authority",
+                superpower: [
+                    "People naturally follow you—leadership isn't forced, it's magnetic",
+                    "Strategic thinking—you see 3 moves ahead in any game",
+                    "Integrity & moral clarity—people trust you instinctively"
+                ],
+                kryptonite: [
+                    "Control addiction—you struggle when not in command",
+                    "Impostor syndrome paradox—despite outward success, internal doubt lingers",
+                    "Relationship friction—loved ones feel bossed rather than partnered with"
+                ]
+            },
+            seven_killer: {
+                name: "The Renegade Warrior",
+                archetype: "The Revolutionary Fighter",
+                superpower: [
+                    "Thrives in adversity—you come alive when everything falls apart",
+                    "Fearless risk-taker—you bet on yourself when others play it safe",
+                    "Magnetic intensity—people are both drawn to and slightly terrified of you"
+                ],
+                kryptonite: [
+                    "Self-destructive tendency—you can sabotage your own success",
+                    "Trust issues—you assume betrayal before it happens",
+                    "Relationship instability—your intensity requires partners with equal power"
+                ]
+            },
+            direct_wealth: {
+                name: "The Value Builder",
+                archetype: "The Master of Manifestation",
+                superpower: [
+                    "Material mastery—you understand how to create tangible value",
+                    "Patience of a farmer—compounding wealth is your natural rhythm",
+                    "Grounded pragmatism—you build to last, not to impress"
+                ],
+                kryptonite: [
+                    "Scarcity mindset—fear of loss prevents you from investing boldly",
+                    "Workaholism—you conflate self-worth with net worth",
+                    "Emotional numbness—accumulating wealth at the expense of relationships"
+                ]
+            },
+            partial_wealth: {
+                name: "The High-Stakes Entrepreneur",
+                archetype: "The Opportunist & Risk-Taker",
+                superpower: [
+                    "Spot opportunities invisible to others—sixth sense for trends",
+                    "Rapid decision-making—you act before others finish analyzing",
+                    "Charming persuasion—people want to invest in YOUR vision"
+                ],
+                kryptonite: [
+                    "Impulsivity—shiny object syndrome derails long-term plans",
+                    "Relationship volatility—chasing the next big thing neglects those at home",
+                    "Financial instability—feast-famine cycles from risk overexposure"
+                ]
+            },
+            positive_seal: {
+                name: "The Guardian Angel",
+                archetype: "The Healer & Protector",
+                superpower: [
+                    "Empathy beyond measure—you feel others' pain as your own",
+                    "Natural counselor—people confess their deepest secrets to you",
+                    "Intuitive wisdom—you know things without being told"
+                ],
+                kryptonite: [
+                    "Boundary-less compassion—you absorb others' trauma, risking your own health",
+                    "Martyrdom complex—you sacrifice yourself 'for the greater good'",
+                    "Decision paralysis—because you understand all perspectives, choosing is agonizing"
+                ]
+            },
+            hidden_seal: {
+                name: "The Cosmic Mystic",
+                archetype: "The Spiritual Alchemist",
+                superpower: [
+                    "You perceive the unseen—spirituality is not belief but direct knowing",
+                    "Psychic sensitivity—you pick up on energy, intentions, hidden truths",
+                    "Mystical power—synchronicities follow you; the universe conspires in your favor"
+                ],
+                kryptonite: [
+                    "Reality dissociation—you live more in the spiritual realm than the practical",
+                    "Victim mentality—karmic thinking can paralyze necessary action",
+                    "Isolation—others don't understand your inner universe"
+                ]
+            }
+        };
+
+        // ===== CORE CALCULATION FUNCTIONS =====
+        function getGanZhi(year, month, day, hour) {
+            const yearGan = TIAN_GAN[(year - 1900) % 10];
+            const yearZhi = DI_ZHI[(year - 1900) % 12];
+
+            const monthGanIndex = ((year - 1900) * 2 + month - 1) % 10;
+            const monthGan = TIAN_GAN[monthGanIndex];
+            const monthZhi = DI_ZHI[(month + 1) % 12 || 12];
+
+            const days = new Date(year, month - 1, day).getDate();
+            const dayGanIndex = (year * 0.2422 + month * 1.6278 + days - 1) % 10;
+            const dayGan = TIAN_GAN[Math.floor(dayGanIndex)];
+            const dayZhi = DI_ZHI[((days - 1) % 12)];
+
+            const hourIndex = hour % 12;
+            const hourGan = TIAN_GAN[(dayGanIndex * 2 + hourIndex) % 10];
+            const hourZhi = DI_ZHI[hourIndex];
+
+            return {
+                year: yearGan + yearZhi,
+                month: monthGan + monthZhi,
+                day: dayGan + dayZhi,
+                hour: hourGan + hourZhi,
+                dayGan: dayGan
+            };
+        }
+
+        function countWuxing(baziData) {
+            const count = {
+                fire: 0, earth: 0, metal: 0, water: 0, wood: 0
+            };
+
+            [baziData.year[0], baziData.month[0], baziData.day[0], baziData.hour[0]].forEach(char => {
+                const wuxing = WUXING_MAP[char];
+                if (wuxing) count[wuxing]++;
+            });
+
+            [baziData.year[1], baziData.month[1], baziData.day[1], baziData.hour[1]].forEach(char => {
+                const wuxing = WUXING_ZHI[char];
+                if (wuxing) count[wuxing]++;
+            });
+
+            return count;
+        }
+
+        function analyzeFate(baziData, wuxingCount) {
+            const total = Object.values(wuxingCount).reduce((a, b) => a + b, 0);
+
+            const fireRatio = wuxingCount.fire / total;
+            const earthRatio = wuxingCount.earth / total;
+            const metalRatio = wuxingCount.metal / total;
+            const waterRatio = wuxingCount.water / total;
+            const woodRatio = wuxingCount.wood / total;
+
+            // Determine Day Master Element (based on dayGan)
+            const dayMasterElement = WUXING_MAP[baziData.dayGan];
+            const dayMasterYin = '乙丁己辛癸'.includes(baziData.dayGan) ? 'yin' : 'yang';
+
+            // Calculate Vibe Metrics
+            const groundingScore = Math.min(100, (earthRatio + metalRatio) * 150);
+            const burnoutRisk = 100 - Math.min(100, (waterRatio + woodRatio) * 100);
+            const intuitionScore = Math.min(100, (waterRatio + fireRatio) * 150);
+
+            return {
+                fireRatio, earthRatio, metalRatio, waterRatio, woodRatio,
+                groundingScore: Math.floor(groundingScore),
+                burnoutRisk: Math.floor(burnoutRisk),
+                intuitionScore: Math.floor(intuitionScore),
+                dayMasterElement,
+                dayMasterYin
+            };
+        }
+
+        // ===== RENDER FUNCTIONS =====
+        function renderEnergyMatrix(wuxingCount, fateAnalysis) {
+            const total = Object.values(wuxingCount).reduce((a, b) => a + b, 0);
+
+            // Radar Chart
+            const ctx = document.getElementById('radarChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['🔴 Fire', '🟫 Earth', '🟡 Metal', '💧 Water', '🌳 Wood'],
+                    datasets: [{
+                        label: 'Energy Signature',
+                        data: [
+                            (wuxingCount.fire / total) * 100,
+                            (wuxingCount.earth / total) * 100,
+                            (wuxingCount.metal / total) * 100,
+                            (wuxingCount.water / total) * 100,
+                            (wuxingCount.wood / total) * 100
+                        ],
+                        borderColor: '#d4af37',
+                        backgroundColor: 'rgba(212, 175, 55, 0.2)',
+                        pointBackgroundColor: '#d4af37',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: '#d4af37',
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            labels: { color: '#d4af37' }
+                        }
+                    },
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            max: 40,
+                            grid: { color: 'rgba(212, 175, 55, 0.2)' },
+                            ticks: { color: '#d4af37' }
+                        }
+                    }
+                }
+            });
+
+            // Energy Bars
+            const barsHTML = `
+                <div class="space-y-4">
+                    ${['fire', 'earth', 'metal', 'water', 'wood'].map(elem => {
+                        const percent = (wuxingCount[elem] / total) * 100;
+                        return `
+                            <div>
+                                <div class="flex justify-between mb-1">
+                                    <span class="text-purple-200 font-semibold">${elem.toUpperCase()}</span>
+                                    <span class="text-d4af37">${Math.round(percent)}%</span>
+                                </div>
+                                <div class="w-full bg-gray-700 rounded-full h-3">
+                                    <div class="bg-gradient-to-r from-d4af37 to-8b1ba8 h-3 rounded-full" style="width: ${percent}%"></div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+            document.getElementById('energyBarsContainer').innerHTML = barsHTML;
+        }
+
+        function renderVibeMetrics(fateAnalysis) {
+            // Grounding
+            document.getElementById('groundingScore').textContent = fateAnalysis.groundingScore + '/100';
+            document.getElementById('groundingDesc').textContent = fateAnalysis.groundingScore > 70
+                ? "You are a manifestation master—ideas crystallize into reality through you. Grounded, practical, unshakeable."
+                : fateAnalysis.groundingScore > 40
+                ? "Moderate grounding. You have flashes of brilliance but need structure to sustain them."
+                : "You live in the realm of ideas and spirit. Ground yourself through daily rituals, community, and physical practice.";
+
+            // Burnout
+            document.getElementById('burnoutScore').textContent = fateAnalysis.burnoutRisk + '/100';
+            document.getElementById('burnoutDesc').textContent = fateAnalysis.burnoutRisk > 70
+                ? "⚠️ HIGH RISK. Your energy burns bright but fast. Schedule rest like it's a business meeting."
+                : fateAnalysis.burnoutRisk > 40
+                ? "Moderate risk. You run on passion but need regular recovery cycles."
+                : "Low risk. You have natural resilience and steady energy reserves.";
+
+            // Intuition
+            document.getElementById('intuitionScore').textContent = fateAnalysis.intuitionScore + '/100';
+            document.getElementById('intuitionDesc').textContent = fateAnalysis.intuitionScore > 70
+                ? "Your intuition is a superpower. Trust the whispers before logic catches up. You're picking up signals others miss."
+                : fateAnalysis.intuitionScore > 40
+                ? "Good intuitive capacity. Meditate to strengthen this channel."
+                : "Grounded in logic. Develop intuition through creative practices and stillness.";
+        }
+
+        function renderSoulCore(fateAnalysis) {
+            const core = SOUL_CORES[fateAnalysis.dayMasterElement][fateAnalysis.dayMasterYin];
+            document.getElementById('soulCoreName').textContent = core.name;
+            document.getElementById('soulCoreDesc').textContent = core.desc;
+        }
+
+        // ===== RENDER: ARCHETYPE & PSYCHOLOGY =====
+        function renderArchetype(fateAnalysis, wuxingCount, gender) {
+            const archetypeKey = fateAnalysis.waterRatio > 0.25 ? 'positive_seal'
+                                : fateAnalysis.fireRatio > 0.25 ? 'food_god'
+                                : fateAnalysis.metalRatio > 0.25 ? 'official'
+                                : 'direct_wealth';
+
+            const arch = ARCHETYPE_MAP[archetypeKey];
+
+            let html = `
+                <h4 class="text-xl font-bold text-d4af37 mb-4">YOUR PRIMARY ARCHETYPE: ${arch.name}</h4>
+                <p class="text-purple-300 mb-6 text-lg">"${arch.archetype}"</p>
+
+                <div class="superpower mb-6">
+                    <div class="superpower-label">✨ SUPERPOWER (Your Genius Zone)</div>
+                    <ul class="text-purple-200 space-y-2">
+                        ${arch.superpower.map(s => `<li class="ml-4">• ${s}</li>`).join('')}
+                    </ul>
+                </div>
+
+                <div class="kryptonite">
+                    <div class="kryptonite-label">⚡ SHADOW SIDE (Your Psychological Trap)</div>
+                    <ul class="text-purple-200 space-y-2">
+                        ${arch.kryptonite.map(k => `<li class="ml-4">• ${k}</li>`).join('')}
+                    </ul>
+                </div>
+
+                <div class="metric-card mt-6">
+                    <div class="metric-label">🧠 PSYCHOLOGICAL INSIGHT</div>
+                    <div class="text-purple-200 mt-4 leading-relaxed">
+                        Your archetype operates through ${gender === 'male' ? 'driven ambition' : 'intuitive wisdom'}.
+                        To unlock your full potential, the key is not suppressing your shadow but <strong>integrating</strong> it.
+                        Your "weakness" is often your strength inverted. Example: Your tendency toward perfectionism?
+                        That's your standards-setting genius turned inward. Channel it outward instead.
+                    </div>
+                </div>
+            `;
+            document.getElementById('archetypeContainer').innerHTML = html;
+        }
+
+        // ===== RENDER: LOVE & ATTACHMENT =====
+        function renderLoveAnalysis(baziData, fateAnalysis, gender) {
+            const attachmentStyle = fateAnalysis.waterRatio > 0.3 ? 'anxious'
+                                   : fateAnalysis.metalRatio > 0.3 ? 'avoidant'
+                                   : 'secure';
+
+            const attachmentDesc = {
+                anxious: "You crave deep emotional connection and fear abandonment. You're naturally intuitive in relationships but may become hypervigilant. Your superpower: your loyalty is legendary. Shadow: you can smother partners with need for reassurance.",
+                avoidant: "You value independence fiercely and fear losing autonomy. You're self-sufficient to a fault. Your superpower: you don't drain others emotionally. Shadow: you can seem cold or emotionally unavailable.",
+                secure: "You balance independence with intimacy naturally. People feel safe with you. Your superpower: healthy boundaries + genuine care. Your relationships are your greatest achievement."
+            };
+
+            const mirrorArchetype = gender === 'male'
+                ? (fateAnalysis.fireRatio > 0.2 ? 'passionate, expressive partner' : 'grounded, stable partner')
+                : (fateAnalysis.metalRatio > 0.2 ? 'ambitious, driven partner' : 'nurturing, intuitive partner');
+
+            let html = `
+                <h4 class="text-xl font-bold text-d4af37 mb-4">YOUR ROMANTIC ATTACHMENT STYLE</h4>
+                <div class="archetype-card mb-6">
+                    <div class="archetype-title capitalize">${attachmentStyle} Attachment</div>
+                    <p class="text-purple-200 mt-4">${attachmentDesc[attachmentStyle]}</p>
+                </div>
+
+                <h4 class="text-xl font-bold text-d4af37 mb-4 mt-8">MIRROR & TWIN FLAME BLUEPRINT</h4>
+                <div class="metric-card mb-6">
+                    <div class="text-purple-200">
+                        You are magnetically drawn to partners with <strong>${mirrorArchetype}</strong> energy.
+                        Paradoxically, the relationship that will transform you most is with someone who <strong>
+                        ${fateAnalysis.woodRatio > 0.2 ? 'challenges your growth' : 'grounds your idealism'}</strong>.
+                    </div>
+                </div>
+
+                <h4 class="text-xl font-bold text-d4af37 mb-4">RELATIONSHIP BLINDSPOT (The Psychological Pattern)</h4>
+                <div class="kryptonite">
+                    <p class="text-purple-200">
+                        ${gender === 'male' && fateAnalysis.metalRatio > 0.2
+                            ? "You lead with logic, leaving partners feeling analyzed rather than loved. Your gift is clarity; your trap is treating intimacy like a problem to solve."
+                            : gender === 'male' && fateAnalysis.fireRatio > 0.2
+                            ? "Your intensity can feel like madness to more reserved partners. You must learn that not everyone burns at your temperature."
+                            : gender === 'female' && fateAnalysis.waterRatio > 0.2
+                            ? "You absorb your partner's emotions as if they're your own. You must learn: their pain is not your responsibility to fix."
+                            : "Your tendency to nurture everyone except yourself leads to resentment. Prioritize your own needs first."
+                        }
+                    </p>
+                </div>
+            `;
+            document.getElementById('loveContainer').innerHTML = html;
+        }
+
+        // ===== RENDER: CAREER & MANIFESTATION =====
+        function renderCareerAnalysis(wuxingCount, fateAnalysis) {
+            const abundanceFreq = wuxingCount.metal > wuxingCount.water ? 'value_builder'
+                                 : wuxingCount.water > wuxingCount.metal ? 'entrepreneur'
+                                 : 'balanced';
+
+            const frequencyDesc = {
+                value_builder: {
+                    type: "The Master Value Builder",
+                    desc: "You build wealth through accumulation, expertise, and compound interest. Your ideal path: deep specialization → authority → premium pricing. Avoid: chasing quick gains.",
+                    niches: ["Executive Coach", "AI Product Manager", "Consulting Founder", "Technical Writer", "Software Architect"]
+                },
+                entrepreneur: {
+                    type: "The High-Stakes Entrepreneur",
+                    desc: "You thrive on opportunity spotting and rapid pivoting. Your ideal path: identify market gaps → rapid MVP → scale. You're built for startups and portfolio careers.",
+                    niches: ["Crypto/Web3 Founder", "Content Creator", "Trader/Investor", "Marketing Founder", "Digital Product Creator"]
+                },
+                balanced: {
+                    type: "The Hybrid Builder",
+                    desc: "You can excel in both stabilization and growth modes. Your superpower: knowing when to consolidate vs expand.",
+                    niches: ["Solopreneur", "Agency Owner", "Digital Product + Services", "Hybrid Investing"]
+                }
+            };
+
+            const freq = frequencyDesc[abundanceFreq];
+            const blockages = wuxingCount.metal + wuxingCount.wood > 3
+                ? "Imposter syndrome paralyzes your asking power. You undercharge because you don't believe you deserve it."
+                : "Comparison trap: you measure success against others' highlight reels. Build metrics around personal growth instead.";
+
+            let html = `
+                <h4 class="text-xl font-bold text-d4af37 mb-4">YOUR ABUNDANCE FREQUENCY</h4>
+                <div class="archetype-card mb-6">
+                    <div class="archetype-title">${freq.type}</div>
+                    <p class="text-purple-200 mt-4">${freq.desc}</p>
+                </div>
+
+                <h4 class="text-xl font-bold text-d4af37 mb-4">🎯 YOUR GOLDEN MICRO-NICHES</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    ${freq.niches.map(niche => `
+                        <div class="metric-card text-center">
+                            <div class="text-purple-200 font-semibold">${niche}</div>
+                        </div>
+                    `).join('')}
+                </div>
+
+                <h4 class="text-xl font-bold text-d4af37 mb-4">💰 MANIFESTING YOUR FINANCIAL FLOW</h4>
+                <div class="ritual-box">
+                    <div class="ritual-title">The Abundance Blocklist (What Silently Kills Your Manifestation)</div>
+                    <div class="ritual-content">
+                        <strong>Your Primary Blockage:</strong> ${blockages}
+                        <br><br>
+                        <strong>Action Step:</strong> For the next 30 days, every time you undercharge or diminish your work, pause and ask: "What belief made me do that?" Write it down. You're debugging your money code.
+                    </div>
+                </div>
+            `;
+            document.getElementById('careerContainer').innerHTML = html;
+        }
+
+        // ===== RENDER: COSMIC SEASONS =====
+        function renderCosmicSeasons(birthYear) {
+            const currentYear = new Date().getFullYear();
+            const ageEstimate = currentYear - birthYear;
+
+            const seasons = [
+                { age: '0-9', season: 'Spring: The Foundation', desc: 'Early learning, identity formation. Vulnerable but plastic—everything shapes you.' },
+                { age: '10-19', season: 'Summer: The Awakening', desc: 'Passion peaks, boundaries blur. You are pure potential in this phase.' },
+                { age: '20-29', season: 'Solar Summer: Radical Visibility', desc: 'You\'re meant to be seen NOW. Take up space. The universe is pushing you to the stage.' },
+                { age: '30-39', season: 'Autumn Transition: Consolidation', desc: 'Harvest time. What you planted in 20s bears fruit. Strategic choices compound.' },
+                { age: '40-49', season: 'Mature Autumn: Authority Phase', desc: 'You become the elder. Leadership, mentorship, legacy building.' },
+                { age: '50+', season: 'Winter Solstice: Integration & Wisdom', desc: 'Cocooning, integration, passing wisdom. The deepest power now is stillness.' }
+            ];
+
+            const currentSeason = seasons.find((s, i) => {
+                const ageRange = s.age.split('-').map(Number);
+                return ageEstimate >= ageRange[0] && ageEstimate <= ageRange[1];
+            }) || seasons[3];
+
+            let html = `
+                <h4 class="text-xl font-bold text-d4af37 mb-4">YOUR CURRENT COSMIC SEASON (Age ${ageEstimate})</h4>
+                <div class="soul-core-card">
+                    <div class="soul-core-title">${currentSeason.season}</div>
+                    <div class="soul-core-desc" style="font-size: 1.1rem;">${currentSeason.desc}</div>
+                </div>
+
+                <h4 class="text-xl font-bold text-d4af37 mb-4 mt-8">WHAT THIS MEANS</h4>
+                <div class="metric-card">
+                    <div class="text-purple-200">
+                        ${ageEstimate < 20 ? "You're not supposed to have it figured out. Permission granted: experiment freely."
+                        : ageEstimate < 30 ? "This is your visibility window. Do the scary thing now. Build audience, create, fail publicly."
+                        : ageEstimate < 40 ? "Stop chasing novelty. Deepen one thing. Mastery compounds into multiplied income."
+                        : "Your superpower now is saying 'no'. Protection of time is your highest ROI investment."
+                        }
+                    </div>
+                </div>
+
+                <h4 class="text-xl font-bold text-d4af37 mb-4 mt-8">FLOW YEAR AHEAD (Transit Weather)</h4>
+                <div class="ritual-box">
+                    <div class="ritual-title">🌟 This Year's Energy</div>
+                    <div class="ritual-content">
+                        Your current cycle aligns with ${['growth & expansion', 'consolidation & wisdom', 'transformation & release', 'manifestation & visibility'][Math.floor(Math.random() * 4)]} energy.
+                        <br><br>
+                        <strong>Alignment Windows Coming:</strong> Look for moments when major projects want to align with this season's theme.
+                    </div>
+                </div>
+            `;
+            document.getElementById('cosmicContainer').innerHTML = html;
+        }
+
+        // ===== RENDER: HIGH-VIBE RITUALS & BIOHACKING =====
+        function renderRituals(fateAnalysis) {
+            const preferredColors = fateAnalysis.waterRatio > 0.25 ? ['#1a0a2e', '#0a4d7a', '#d4af37']
+                                   : fateAnalysis.fireRatio > 0.25 ? ['#6a0572', '#d4af37', '#ff6b35']
+                                   : fateAnalysis.metalRatio > 0.25 ? ['#ffffff', '#d4af37', '#808080']
+                                   : ['#2d5016', '#8b7355', '#d4af37'];
+
+            const colorNames = fateAnalysis.waterRatio > 0.25 ? ['Deep Mystique', 'Ocean Depth', 'Gold']
+                              : fateAnalysis.fireRatio > 0.25 ? ['Mystic Purple', 'Gold', 'Sunset Fire']
+                              : fateAnalysis.metalRatio > 0.25 ? ['Pristine White', 'Gold', 'Silver']
+                              : ['Forest Green', 'Earth Brown', 'Gold'];
+
+            const rituals = fateAnalysis.waterRatio > 0.25
+                ? ['Morning breathwork facing water (ocean, lake, or even a fountain)',
+                   'Evening journaling with oracle or tarot',
+                   'Weekly float tank or sensory deprivation session']
+                : fateAnalysis.fireRatio > 0.25
+                ? ['Sunrise power posing (activate your magnetic field)',
+                   'Community time (you charge others and vice versa)',
+                   'Creative expression—sing, dance, paint, even if badly']
+                : ['Barefoot grounding (30 min daily, no shoes, direct earth contact)',
+                   'Minimalism audit (remove 5 items weekly—physical = energetic declutter)',
+                   'Gratitude anchoring (write 3 specific gratitudes daily)'];
+
+            let html = `
+                <h4 class="text-xl font-bold text-d4af37 mb-4">🌈 YOUR ENERGY COLOR PALETTE</h4>
+                <div class="flex justify-center gap-4 mb-8">
+                    ${preferredColors.map((color, i) => `
+                        <div class="text-center">
+                            <div class="color-swatch" style="background-color: ${color}"></div>
+                            <p class="text-purple-200 text-sm mt-2">${colorNames[i]}</p>
+                        </div>
+                    `).join('')}
+                </div>
+
+                <p class="text-purple-300 mb-8 text-center italic">
+                    These colors activate your natural frequency. Use them in: clothing, workspace, phone wallpaper, meditation focal points.
+                </p>
+
+                <h4 class="text-xl font-bold text-d4af37 mb-4">🏡 MICRO-SPACE FENG SHUI (Desk Setup)</h4>
+                <div class="metric-card mb-6">
+                    <div class="text-purple-200">
+                        ${fateAnalysis.waterRatio > 0.25
+                            ? "North section of desk: black tourmaline or blue fluorite (amplifies intuition). Add a small water element—fountain or bamboo in water."
+                            : fateAnalysis.fireRatio > 0.25
+                            ? "South/center: red or orange element (candle, red jasper crystal). This ignites visibility and action."
+                            : "East/southeast: green plant (wood element). This anchors growth energy to your space."
+                        }
+                    </div>
+                </div>
+
+                <h4 class="text-xl font-bold text-d4af37 mb-4">✨ YOUR 5-MINUTE DAILY RITUAL</h4>
+                <div class="space-y-3">
+                    ${rituals.map(ritual => `
+                        <div class="ritual-box">
+                            <div class="ritual-title">→ ${ritual}</div>
+                        </div>
+                    `).join('')}
+                </div>
+
+                <div class="metric-card mt-8">
+                    <div class="metric-label">Why This Matters</div>
+                    <div class="text-purple-200 mt-4">
+                        Rituals aren't superstition—they're sovereignty. You're telling the universe: "I am conscious. I am intentional. I am here."
+                        Small daily acts compound into massive frequency shifts. Do these for 90 days and watch what magnetizes toward you.
+                    </div>
+                </div>
+            `;
+            document.getElementById('ritualContainer').innerHTML = html;
+        }
+
+        // ===== MAIN SUBMIT HANDLER =====
+        document.getElementById('baziForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const name = document.getElementById('userName').value.trim();
+            const year = parseInt(document.getElementById('birthYear').value);
+            const month = parseInt(document.getElementById('birthMonth').value);
+            const day = parseInt(document.getElementById('birthDay').value);
+            const hour = parseInt(document.getElementById('birthHour').value);
+            const gender = document.querySelector('input[name="gender"]:checked').value;
+
+            if (!name || !year || !month || !day || hour === '' || !gender) {
+                document.getElementById('errorText').textContent = 'Please complete all fields';
+                document.getElementById('errorContainer').classList.remove('hidden');
+                return;
+            }
+
+            document.getElementById('formContainer').classList.add('hidden');
+            document.getElementById('loadingContainer').classList.remove('hidden');
+
+            setTimeout(() => {
+                try {
+                    const baziData = getGanZhi(year, month, day, hour);
+                    const wuxingCount = countWuxing(baziData);
+                    const fateAnalysis = analyzeFate(baziData, wuxingCount);
+
+                    // Render all modules
+                    renderEnergyMatrix(wuxingCount, fateAnalysis);
+                    renderVibeMetrics(fateAnalysis);
+                    renderSoulCore(fateAnalysis);
+
+                    // Render additional modules
+                    renderArchetype(fateAnalysis, wuxingCount, gender);
+                    renderLoveAnalysis(baziData, fateAnalysis, gender);
+                    renderCareerAnalysis(wuxingCount, fateAnalysis);
+                    renderCosmicSeasons(year);
+                    renderRituals(fateAnalysis);
+
+                    document.getElementById('loadingContainer').classList.add('hidden');
+                    document.getElementById('resultContainer').classList.remove('hidden');
+
+                    setTimeout(() => {
+                        document.getElementById('resultContainer').scrollIntoView({ behavior: 'smooth' });
+                    }, 300);
+                } catch (error) {
+                    console.error(error);
+                    document.getElementById('errorText').textContent = 'Calculation error: ' + error.message;
+                    document.getElementById('errorContainer').classList.remove('hidden');
+                    document.getElementById('formContainer').classList.remove('hidden');
+                    document.getElementById('loadingContainer').classList.add('hidden');
+                }
+            }, 1500);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>✨ 生辰八字算命 ✨</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Montserrat:wght@300;400;500;600&display=swap');
+
+        * {
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .title-font {
+            font-family: 'Cinzel', serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0a0a1f 0%, #1a0a2e 25%, #2d0a4e 50%, #1a0a2e 75%, #0a0a1f 100%);
+            background-attachment: fixed;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* 星空背景动画 */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                radial-gradient(2px 2px at 20px 30px, #eee, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 60px 70px, #fff, rgba(0,0,0,0)),
+                radial-gradient(1px 1px at 50px 50px, #fff, rgba(0,0,0,0)),
+                radial-gradient(1px 1px at 130px 80px, #fff, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 90px 10px, #fff, rgba(0,0,0,0));
+            background-size: 200px 200px;
+            background-position: 0 0;
+            animation: twinkle 5s infinite;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.5;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.8; }
+        }
+
+        .content-wrapper {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* 太极八卦装饰 */
+        .taiji-bg {
+            position: absolute;
+            font-size: 120px;
+            opacity: 0.1;
+            animation: rotate 20s infinite linear;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* 信息卡片 */
+        .info-card {
+            background: rgba(26, 10, 46, 0.8);
+            border: 2px solid #d4af37;
+            border-radius: 12px;
+            box-shadow: 0 0 30px rgba(212, 175, 55, 0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        /* 八字方形显示 */
+        .bazi-box {
+            background: linear-gradient(135deg, #6a0572 0%, #2d0a4e 100%);
+            border: 2px solid #d4af37;
+            border-radius: 8px;
+            padding: 16px;
+            text-align: center;
+            min-height: 80px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.3);
+        }
+
+        .bazi-item {
+            color: #d4af37;
+            font-weight: bold;
+            font-size: 1.125rem;
+        }
+
+        .bazi-label {
+            color: #c8a882;
+            font-size: 0.875rem;
+            margin-top: 4px;
+        }
+
+        /* 五行显示 */
+        .wuxing-item {
+            background: rgba(106, 5, 114, 0.3);
+            border-left: 4px solid #d4af37;
+            padding: 12px;
+            border-radius: 4px;
+            margin-bottom: 8px;
+        }
+
+        .wuxing-label {
+            color: #d4af37;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+
+        .wuxing-bar {
+            background: rgba(212, 175, 55, 0.2);
+            height: 6px;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .wuxing-fill {
+            background: linear-gradient(90deg, #d4af37, #8b1ba8);
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.8s ease;
+        }
+
+        /* 按钮样式 */
+        .btn-mystical {
+            background: linear-gradient(135deg, #6a0572 0%, #8b1ba8 100%);
+            box-shadow: 0 0 20px rgba(106, 5, 114, 0.5);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-mystical:hover {
+            box-shadow: 0 0 40px rgba(106, 5, 114, 0.8),
+                        0 0 60px rgba(212, 175, 55, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .btn-mystical:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* 加载动画 */
+        .spinner {
+            border: 4px solid rgba(212, 175, 55, 0.3);
+            border-top: 4px solid #d4af37;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* 输入框样式 */
+        .input-mystical {
+            background: rgba(106, 5, 114, 0.2);
+            border: 2px solid #6a0572;
+            color: #fff;
+            transition: all 0.3s ease;
+        }
+
+        .input-mystical:focus {
+            border-color: #d4af37;
+            background: rgba(106, 5, 114, 0.3);
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.3);
+            outline: none;
+        }
+
+        .input-mystical::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        /* 渐变文字 */
+        .gradient-text {
+            background: linear-gradient(135deg, #d4af37, #8b1ba8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* 命格标签 */
+        .fate-tag {
+            display: inline-block;
+            background: linear-gradient(135deg, #6a0572, #8b1ba8);
+            color: #d4af37;
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 1px solid #d4af37;
+            font-weight: bold;
+            margin: 4px 8px 4px 0;
+        }
+
+        /* 吉凶指数 */
+        .fortune-meter {
+            margin: 16px 0;
+        }
+
+        .fortune-label {
+            color: #d4af37;
+            font-weight: bold;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .fortune-bar {
+            background: rgba(212, 175, 55, 0.2);
+            height: 10px;
+            border-radius: 5px;
+            overflow: hidden;
+            border: 1px solid #d4af37;
+        }
+
+        .fortune-fill {
+            height: 100%;
+            border-radius: 5px;
+            transition: width 0.8s ease;
+        }
+
+        .fortune-fill.good {
+            background: linear-gradient(90deg, #4ade80, #10b981);
+        }
+
+        .fortune-fill.neutral {
+            background: linear-gradient(90deg, #f59e0b, #d97706);
+        }
+
+        .fortune-fill.poor {
+            background: linear-gradient(90deg, #ef4444, #dc2626);
+        }
+
+        /* 响应式调整 */
+        @media (max-width: 768px) {
+            .title-font {
+                font-size: 1.875rem;
+            }
+
+            .bazi-box {
+                min-height: 70px;
+                padding: 12px;
+            }
+
+            .bazi-item {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="content-wrapper min-h-screen py-8 px-4">
+        <!-- 装饰元素 -->
+        <div class="taiji-bg fixed top-10 right-10">☯</div>
+        <div class="taiji-bg fixed bottom-20 left-10" style="animation-direction: reverse;">☯</div>
+
+        <!-- 主容器 -->
+        <div class="max-w-4xl mx-auto">
+            <!-- Header -->
+            <div class="text-center mb-12">
+                <h1 class="title-font text-5xl md:text-6xl font-bold mb-3 gradient-text">✨ 生辰八字命盘 ✨</h1>
+                <p class="text-purple-300 text-lg">以天地之数，启智慧之光</p>
+            </div>
+
+            <!-- 表单区域 -->
+            <div class="info-card p-8 mb-8">
+                <form id="baziForm" class="space-y-6">
+                    <!-- 姓名输入 -->
+                    <div>
+                        <label class="block text-purple-200 mb-2 font-semibold">✦ 您的姓名</label>
+                        <input
+                            type="text"
+                            id="userName"
+                            placeholder="请输入您的名字..."
+                            class="input-mystical w-full px-4 py-3 rounded-lg"
+                            required
+                        >
+                    </div>
+
+                    <!-- 出生信息 -->
+                    <div>
+                        <label class="block text-purple-200 mb-3 font-semibold">✦ 出生信息（阳历）</label>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                            <div>
+                                <label class="text-sm text-purple-300 mb-1 block">年</label>
+                                <input
+                                    type="number"
+                                    id="birthYear"
+                                    placeholder="1990"
+                                    min="1900"
+                                    max="2024"
+                                    class="input-mystical w-full px-4 py-3 rounded-lg"
+                                    required
+                                >
+                            </div>
+                            <div>
+                                <label class="text-sm text-purple-300 mb-1 block">月</label>
+                                <input
+                                    type="number"
+                                    id="birthMonth"
+                                    placeholder="1-12"
+                                    min="1"
+                                    max="12"
+                                    class="input-mystical w-full px-4 py-3 rounded-lg"
+                                    required
+                                >
+                            </div>
+                            <div>
+                                <label class="text-sm text-purple-300 mb-1 block">日</label>
+                                <input
+                                    type="number"
+                                    id="birthDay"
+                                    placeholder="1-31"
+                                    min="1"
+                                    max="31"
+                                    class="input-mystical w-full px-4 py-3 rounded-lg"
+                                    required
+                                >
+                            </div>
+                            <div>
+                                <label class="text-sm text-purple-300 mb-1 block">时辰</label>
+                                <select id="birthHour" class="input-mystical w-full px-4 py-3 rounded-lg" required>
+                                    <option value="">选择时辰</option>
+                                    <option value="0">子时 (23-1)</option>
+                                    <option value="1">丑时 (1-3)</option>
+                                    <option value="2">寅时 (3-5)</option>
+                                    <option value="3">卯时 (5-7)</option>
+                                    <option value="4">辰时 (7-9)</option>
+                                    <option value="5">巳时 (9-11)</option>
+                                    <option value="6">午时 (11-13)</option>
+                                    <option value="7">未时 (13-15)</option>
+                                    <option value="8">申时 (15-17)</option>
+                                    <option value="9">酉时 (17-19)</option>
+                                    <option value="10">戌时 (19-21)</option>
+                                    <option value="11">亥时 (21-23)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 性别选择 -->
+                    <div>
+                        <label class="block text-purple-200 mb-3 font-semibold">✦ 性别</label>
+                        <div class="flex gap-4">
+                            <label class="flex items-center cursor-pointer">
+                                <input type="radio" name="gender" value="male" class="mr-2" required>
+                                <span class="text-purple-200">♂ 男</span>
+                            </label>
+                            <label class="flex items-center cursor-pointer">
+                                <input type="radio" name="gender" value="female" class="mr-2" required>
+                                <span class="text-purple-200">♀ 女</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- 提交按钮 -->
+                    <button
+                        type="submit"
+                        class="btn-mystical w-full py-4 text-white font-bold text-lg rounded-lg"
+                        id="submitBtn"
+                    >
+                        🔮 生成命盘
+                    </button>
+                </form>
+            </div>
+
+            <!-- 加载状态 -->
+            <div id="loadingContainer" class="hidden text-center mb-8">
+                <div class="spinner mx-auto mb-4"></div>
+                <p class="text-purple-300">正在推演命盘...</p>
+            </div>
+
+            <!-- 八字命盘显示 -->
+            <div id="resultContainer" class="hidden space-y-8">
+                <!-- 八字信息 -->
+                <div class="info-card p-8">
+                    <h2 class="text-2xl md:text-3xl font-bold gradient-text mb-6">
+                        <span id="resultName"></span> 的生辰八字
+                    </h2>
+
+                    <!-- 八字主体 -->
+                    <div class="grid grid-cols-4 gap-3 mb-8">
+                        <div class="bazi-box">
+                            <div class="text-xs text-purple-300 mb-2">年柱</div>
+                            <div class="bazi-item" id="baziYear">—</div>
+                            <div class="bazi-label" id="baziYearGan">—</div>
+                        </div>
+                        <div class="bazi-box">
+                            <div class="text-xs text-purple-300 mb-2">月柱</div>
+                            <div class="bazi-item" id="baziMonth">—</div>
+                            <div class="bazi-label" id="baziMonthGan">—</div>
+                        </div>
+                        <div class="bazi-box">
+                            <div class="text-xs text-purple-300 mb-2">日柱</div>
+                            <div class="bazi-item" id="baziDay">—</div>
+                            <div class="bazi-label" id="baziDayGan">—</div>
+                        </div>
+                        <div class="bazi-box">
+                            <div class="text-xs text-purple-300 mb-2">时柱</div>
+                            <div class="bazi-item" id="baziHour">—</div>
+                            <div class="bazi-label" id="baziHourGan">—</div>
+                        </div>
+                    </div>
+
+                    <!-- 五行分析 -->
+                    <div class="border-t border-purple-500 pt-6">
+                        <h3 class="text-lg font-semibold text-purple-200 mb-4">🔥 五行分析</h3>
+                        <div class="space-y-3">
+                            <div class="wuxing-item">
+                                <div class="wuxing-label">🔴 火 (丙、丁)</div>
+                                <div class="wuxing-bar">
+                                    <div class="wuxing-fill" id="fireBar" style="width: 0%"></div>
+                                </div>
+                                <div class="text-xs text-purple-300 mt-2" id="fireText">—</div>
+                            </div>
+                            <div class="wuxing-item">
+                                <div class="wuxing-label">🟫 土 (戊、己)</div>
+                                <div class="wuxing-bar">
+                                    <div class="wuxing-fill" id="earthBar" style="width: 0%"></div>
+                                </div>
+                                <div class="text-xs text-purple-300 mt-2" id="earthText">—</div>
+                            </div>
+                            <div class="wuxing-item">
+                                <div class="wuxing-label">🟡 金 (庚、辛)</div>
+                                <div class="wuxing-bar">
+                                    <div class="wuxing-fill" id="metalBar" style="width: 0%"></div>
+                                </div>
+                                <div class="text-xs text-purple-300 mt-2" id="metalText">—</div>
+                            </div>
+                            <div class="wuxing-item">
+                                <div class="wuxing-label">💧 水 (壬、癸)</div>
+                                <div class="wuxing-bar">
+                                    <div class="wuxing-fill" id="waterBar" style="width: 0%"></div>
+                                </div>
+                                <div class="text-xs text-purple-300 mt-2" id="waterText">—</div>
+                            </div>
+                            <div class="wuxing-item">
+                                <div class="wuxing-label">🌳 木 (甲、乙)</div>
+                                <div class="wuxing-bar">
+                                    <div class="wuxing-fill" id="woodBar" style="width: 0%"></div>
+                                </div>
+                                <div class="text-xs text-purple-300 mt-2" id="woodText">—</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 命格分析 -->
+                <div class="info-card p-8">
+                    <h3 class="text-lg font-semibold text-purple-200 mb-4">⭐ 命格信息</h3>
+                    <div class="mb-4">
+                        <div id="fateTagsContainer" class="mb-4"></div>
+                    </div>
+
+                    <!-- 吉凶指数 -->
+                    <div class="fortune-meter">
+                        <div class="fortune-label">
+                            <span>吉祥指数</span>
+                            <span id="fortuneScore">50/100</span>
+                        </div>
+                        <div class="fortune-bar">
+                            <div class="fortune-fill neutral" id="fortuneFill" style="width: 50%"></div>
+                        </div>
+                    </div>
+
+                    <div class="fortune-meter">
+                        <div class="fortune-label">
+                            <span>运势强度</span>
+                            <span id="destinyScore">50/100</span>
+                        </div>
+                        <div class="fortune-bar">
+                            <div class="fortune-fill neutral" id="destinyFill" style="width: 50%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 详细解读 -->
+                <div class="info-card p-8">
+                    <h3 class="text-lg font-semibold text-purple-200 mb-4">📖 命盘解读</h3>
+                    <div id="resultText" class="text-purple-100 leading-relaxed space-y-4 text-sm md:text-base"></div>
+                </div>
+
+                <!-- 重新测算按钮 -->
+                <button
+                    onclick="location.reload()"
+                    class="btn-mystical w-full py-3 text-white font-bold rounded-lg"
+                >
+                    🔄 重新测算
+                </button>
+            </div>
+
+            <!-- 错误提示 -->
+            <div id="errorContainer" class="hidden">
+                <div class="bg-red-900 bg-opacity-50 border border-red-500 rounded-lg p-6 text-red-200">
+                    <p id="errorText"></p>
+                    <button
+                        onclick="document.getElementById('errorContainer').classList.add('hidden')"
+                        class="mt-4 px-4 py-2 bg-red-700 hover:bg-red-600 rounded-lg"
+                    >
+                        关闭
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 天干地支数据
+        const TIAN_GAN = ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸'];
+        const DI_ZHI = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
+
+        // 五行对应关系
+        const WUXING_MAP = {
+            甲: 'wood', 乙: 'wood',
+            丙: 'fire', 丁: 'fire',
+            戊: 'earth', 己: 'earth',
+            庚: 'metal', 辛: 'metal',
+            壬: 'water', 癸: 'water'
+        };
+
+        const WUXING_ZHI = {
+            子: 'water', 丑: 'earth',
+            寅: 'wood', 卯: 'wood',
+            辰: 'earth', 巳: 'fire',
+            午: 'fire', 未: 'earth',
+            申: 'metal', 酉: 'metal',
+            戌: 'earth', 亥: 'water'
+        };
+
+        // 命格解读库
+        const FATE_INTERPRETATIONS = {
+            fortune_high: [
+                '天赋聪慧，命中贵人众多，事业顺遂，财运亨通。',
+                '心地善良，福泽深厚，近贵得利，一生吉祥。',
+                '才华横溢，前程似锦，家庭美满，事业有成。',
+                '运势昌隆，人脉广阔，逢凶化吉，贵人相助。'
+            ],
+            fortune_medium: [
+                '性格温和，人缘好，工作稳定，生活平坦。',
+                '聪慧好学，有上进心，通过努力可获得成功。',
+                '为人诚恳，能吃苦耐劳，收获与付出相当。',
+                '命数平顺，需把握机遇，积极进取。'
+            ],
+            fortune_low: [
+                '命数多磨，需修养身心，方可化解。',
+                '性格较为内向，需主动出击，把握机会。',
+                '运势需磨砺，困难中方能显英雄本色。',
+                '命中有阻，宜韬光养晦，静观其变。'
+            ],
+            love_good: [
+                '感情运佳，桃花旺盛，易遇良缘，婚后和睦。',
+                '異性缘浓，魅力十足，感情生活丰富多彩。'
+            ],
+            love_medium: [
+                '感情缘分中等，需珍惜眼前人。',
+                '感情运稳定，需多沟通理解，方能白头偕老。'
+            ],
+            love_poor: [
+                '感情需要用心经营，勿因小事生隙。',
+                '感情运势平凡，需耐心等待缘分。'
+            ],
+            career_good: [
+                '事业前景光明，升迁机会多，财源滚滚来。',
+                '工作能力强，易获上司赏识，前程远大。'
+            ],
+            career_medium: [
+                '事业平稳发展，通过持续努力可获成就。',
+                '工作机会较多，需把握时机，不可守株待兔。'
+            ],
+            career_poor: [
+                '事业需耐心积累，莫急于求成。',
+                '工作中遇挑战，需冷静应对，方能柳暗花明。'
+            ],
+            health_good: [
+                '身体康健，气血旺盛，精力充沛。',
+                '体质良好，寿元悠长，晚年安乐。'
+            ],
+            health_medium: [
+                '身体无大碍，需注意调养，预防为主。',
+                '体质一般，宜增强锻炼，调理身体。'
+            ],
+            health_poor: [
+                '宜注重养生，定期体检，未雨绸缪。',
+                '体质较弱，需加强调理，谨慎起居。'
+            ]
+        };
+
+        // 获取农历对应的干支
+        function getGanZhi(year, month, day, hour) {
+            // 简化版：根据公式计算干支
+            // 年柱
+            const yearGan = TIAN_GAN[(year - 1900) % 10];
+            const yearZhi = DI_ZHI[(year - 1900) % 12];
+
+            // 月柱（简化计算）
+            const monthGanIndex = ((year - 1900) * 2 + month - 1) % 10;
+            const monthGan = TIAN_GAN[monthGanIndex];
+            const monthZhi = DI_ZHI[(month + 1) % 12 || 12];
+
+            // 日柱（简化计算）
+            const days = new Date(year, month - 1, day).getDate();
+            const dayGanIndex = (year * 0.2422 + month * 1.6278 + days - 1) % 10;
+            const dayGan = TIAN_GAN[Math.floor(dayGanIndex)];
+            const dayZhi = DI_ZHI[((days - 1) % 12)];
+
+            // 时柱
+            const hourIndex = hour % 12;
+            const hourGan = TIAN_GAN[(dayGanIndex * 2 + hourIndex) % 10];
+            const hourZhi = DI_ZHI[hourIndex];
+
+            return {
+                year: yearGan + yearZhi,
+                month: monthGan + monthZhi,
+                day: dayGan + dayZhi,
+                hour: hourGan + hourZhi
+            };
+        }
+
+        function countWuxing(baziData) {
+            const count = {
+                fire: 0, earth: 0, metal: 0, water: 0, wood: 0
+            };
+
+            // 统计天干中的五行
+            [baziData.year[0], baziData.month[0], baziData.day[0], baziData.hour[0]].forEach(char => {
+                const wuxing = WUXING_MAP[char];
+                if (wuxing) count[wuxing]++;
+            });
+
+            // 统计地支中的五行
+            [baziData.year[1], baziData.month[1], baziData.day[1], baziData.hour[1]].forEach(char => {
+                const wuxing = WUXING_ZHI[char];
+                if (wuxing) count[wuxing]++;
+            });
+
+            return count;
+        }
+
+        function analyzeFate(baziData, wuxingCount, gender) {
+            const total = Object.values(wuxingCount).reduce((a, b) => a + b, 0);
+
+            // 计算各五行的比例
+            const fireRatio = wuxingCount.fire / total;
+            const earthRatio = wuxingCount.earth / total;
+            const metalRatio = wuxingCount.metal / total;
+            const waterRatio = wuxingCount.water / total;
+            const woodRatio = wuxingCount.wood / total;
+
+            // 计算吉凶指数
+            let fortuneScore = 50;
+
+            // 五行均衡度影响吉凶
+            const balance = 1 - Math.max(
+                Math.abs(fireRatio - 0.2),
+                Math.abs(earthRatio - 0.2),
+                Math.abs(metalRatio - 0.2),
+                Math.abs(waterRatio - 0.2),
+                Math.abs(woodRatio - 0.2)
+            );
+
+            fortuneScore = Math.floor(50 + balance * 50);
+
+            // 运势强度
+            const destinyScore = Math.floor(30 + (wuxingCount.water + wuxingCount.metal) * 8);
+
+            // 命格特征
+            const fateType = [];
+            if (fireRatio > 0.3) fateType.push('火旺');
+            if (waterRatio > 0.3) fateType.push('水旺');
+            if (woodRatio > 0.3) fateType.push('木旺');
+            if (fireRatio < 0.1) fateType.push('火弱');
+            if (waterRatio < 0.1) fateType.push('水弱');
+
+            if (gender === 'male' && fireRatio > 0.2) fateType.push('事业心强');
+            if (gender === 'female' && waterRatio > 0.2) fateType.push('温柔体贴');
+
+            return {
+                fortuneScore: Math.min(100, fortuneScore),
+                destinyScore: Math.min(100, destinyScore),
+                fateType: fateType.length > 0 ? fateType : ['五行平衡']
+            };
+        }
+
+        function generateInterpretation(baziData, wuxingCount, gender, fortuneScore) {
+            let text = '';
+
+            if (fortuneScore >= 70) {
+                text += '✨ ' + FATE_INTERPRETATIONS.fortune_high[Math.floor(Math.random() * FATE_INTERPRETATIONS.fortune_high.length)] + '\n\n';
+            } else if (fortuneScore >= 40) {
+                text += '✨ ' + FATE_INTERPRETATIONS.fortune_medium[Math.floor(Math.random() * FATE_INTERPRETATIONS.fortune_medium.length)] + '\n\n';
+            } else {
+                text += '✨ ' + FATE_INTERPRETATIONS.fortune_low[Math.floor(Math.random() * FATE_INTERPRETATIONS.fortune_low.length)] + '\n\n';
+            }
+
+            if (gender === 'male' && wuxingCount.fire > 1) {
+                text += '💕 ' + FATE_INTERPRETATIONS.love_good[0] + '\n\n';
+            } else if (gender === 'female' && wuxingCount.water > 1) {
+                text += '💕 ' + FATE_INTERPRETATIONS.love_good[1] + '\n\n';
+            } else {
+                text += '💕 ' + FATE_INTERPRETATIONS.love_medium[0] + '\n\n';
+            }
+
+            if (wuxingCount.metal > 1) {
+                text += '💼 ' + FATE_INTERPRETATIONS.career_good[0] + '\n\n';
+            } else if (wuxingCount.earth > 1) {
+                text += '💼 ' + FATE_INTERPRETATIONS.career_medium[0] + '\n\n';
+            } else {
+                text += '💼 ' + FATE_INTERPRETATIONS.career_medium[1] + '\n\n';
+            }
+
+            if (wuxingCount.wood > 1) {
+                text += '💪 ' + FATE_INTERPRETATIONS.health_good[0] + '\n\n';
+            } else {
+                text += '💪 ' + FATE_INTERPRETATIONS.health_medium[1] + '\n\n';
+            }
+
+            text += '🔮 建议：修身养性，积德行善，方能改运。时刻保持乐观心态，相信未来。';
+
+            return text;
+        }
+
+        // 表单提交
+        document.getElementById('baziForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const name = document.getElementById('userName').value.trim();
+            const year = parseInt(document.getElementById('birthYear').value);
+            const month = parseInt(document.getElementById('birthMonth').value);
+            const day = parseInt(document.getElementById('birthDay').value);
+            const hour = parseInt(document.getElementById('birthHour').value);
+            const gender = document.querySelector('input[name="gender"]:checked').value;
+
+            if (!name || !year || !month || !day || hour === '' || !gender) {
+                showError('请完整填写所有信息');
+                return;
+            }
+
+            // 显示加载状态
+            document.getElementById('baziForm').parentElement.classList.add('hidden');
+            document.getElementById('loadingContainer').classList.remove('hidden');
+
+            setTimeout(() => {
+                try {
+                    // 计算八字
+                    const baziData = getGanZhi(year, month, day, hour);
+                    const wuxingCount = countWuxing(baziData);
+                    const fateAnalysis = analyzeFate(baziData, wuxingCount, gender);
+
+                    // 显示结果
+                    showResult(name, baziData, wuxingCount, fateAnalysis, gender);
+                } catch (error) {
+                    console.error('Error:', error);
+                    showError('计算失败，请检查输入信息');
+                    document.getElementById('baziForm').parentElement.classList.remove('hidden');
+                    document.getElementById('loadingContainer').classList.add('hidden');
+                }
+            }, 1500);
+        });
+
+        function showResult(name, baziData, wuxingCount, fateAnalysis, gender) {
+            document.getElementById('loadingContainer').classList.add('hidden');
+            document.getElementById('resultContainer').classList.remove('hidden');
+
+            // 基本信息
+            document.getElementById('resultName').textContent = name;
+
+            // 显示八字
+            document.getElementById('baziYear').textContent = baziData.year;
+            document.getElementById('baziMonth').textContent = baziData.month;
+            document.getElementById('baziDay').textContent = baziData.day;
+            document.getElementById('baziHour').textContent = baziData.hour;
+
+            // 五行柱位标签
+            const ganZhiLabels = {
+                year: baziData.year[0],
+                month: baziData.month[0],
+                day: baziData.day[0],
+                hour: baziData.hour[0]
+            };
+            document.getElementById('baziYearGan').textContent = ganZhiLabels.year;
+            document.getElementById('baziMonthGan').textContent = ganZhiLabels.month;
+            document.getElementById('baziDayGan').textContent = ganZhiLabels.day;
+            document.getElementById('baziHourGan').textContent = ganZhiLabels.hour;
+
+            // 五行分析
+            const total = Object.values(wuxingCount).reduce((a, b) => a + b, 0);
+            const firePercent = (wuxingCount.fire / total) * 100;
+            const earthPercent = (wuxingCount.earth / total) * 100;
+            const metalPercent = (wuxingCount.metal / total) * 100;
+            const waterPercent = (wuxingCount.water / total) * 100;
+            const woodPercent = (wuxingCount.wood / total) * 100;
+
+            document.getElementById('fireBar').style.width = firePercent + '%';
+            document.getElementById('earthBar').style.width = earthPercent + '%';
+            document.getElementById('metalBar').style.width = metalPercent + '%';
+            document.getElementById('waterBar').style.width = waterPercent + '%';
+            document.getElementById('woodBar').style.width = woodPercent + '%';
+
+            document.getElementById('fireText').textContent = `丙丁火：${wuxingCount.fire}个`;
+            document.getElementById('earthText').textContent = `戊己土：${wuxingCount.earth}个`;
+            document.getElementById('metalText').textContent = `庚辛金：${wuxingCount.metal}个`;
+            document.getElementById('waterText').textContent = `壬癸水：${wuxingCount.water}个`;
+            document.getElementById('woodText').textContent = `甲乙木：${wuxingCount.wood}个`;
+
+            // 命格标签
+            const tagsContainer = document.getElementById('fateTagsContainer');
+            tagsContainer.innerHTML = '';
+            fateAnalysis.fateType.forEach(tag => {
+                const span = document.createElement('span');
+                span.className = 'fate-tag';
+                span.textContent = tag;
+                tagsContainer.appendChild(span);
+            });
+
+            // 吉凶指数
+            document.getElementById('fortuneScore').textContent = fateAnalysis.fortuneScore + '/100';
+            const fortuneFill = document.getElementById('fortuneFill');
+            fortuneFill.style.width = fateAnalysis.fortuneScore + '%';
+            fortuneFill.className = 'fortune-fill ' + (fateAnalysis.fortuneScore >= 70 ? 'good' : fateAnalysis.fortuneScore >= 40 ? 'neutral' : 'poor');
+
+            document.getElementById('destinyScore').textContent = fateAnalysis.destinyScore + '/100';
+            const destinyFill = document.getElementById('destinyFill');
+            destinyFill.style.width = fateAnalysis.destinyScore + '%';
+            destinyFill.className = 'fortune-fill ' + (fateAnalysis.destinyScore >= 70 ? 'good' : fateAnalysis.destinyScore >= 40 ? 'neutral' : 'poor');
+
+            // 生成解读文本
+            const interpretation = generateInterpretation(baziData, wuxingCount, gender, fateAnalysis.fortuneScore);
+            document.getElementById('resultText').innerHTML = interpretation.split('\n\n').map(para => `<p>${para}</p>`).join('');
+
+            // 平滑滚动
+            setTimeout(() => {
+                document.getElementById('resultContainer').scrollIntoView({ behavior: 'smooth' });
+            }, 300);
+        }
+
+        function showError(message) {
+            document.getElementById('errorText').textContent = message;
+            document.getElementById('errorContainer').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>

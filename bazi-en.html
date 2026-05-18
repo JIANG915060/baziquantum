@@ -1,0 +1,1109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>✨ Birth Chart Reading - Bazi Analysis ✨</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Montserrat:wght@300;400;500;600&display=swap');
+
+        * {
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .title-font {
+            font-family: 'Cinzel', serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0a0a1f 0%, #1a0a2e 25%, #2d0a4e 50%, #1a0a2e 75%, #0a0a1f 100%);
+            background-attachment: fixed;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                radial-gradient(2px 2px at 20px 30px, #eee, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 60px 70px, #fff, rgba(0,0,0,0)),
+                radial-gradient(1px 1px at 50px 50px, #fff, rgba(0,0,0,0)),
+                radial-gradient(1px 1px at 130px 80px, #fff, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 90px 10px, #fff, rgba(0,0,0,0));
+            background-size: 200px 200px;
+            background-position: 0 0;
+            animation: twinkle 5s infinite;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.5;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.8; }
+        }
+
+        .content-wrapper {
+            position: relative;
+            z-index: 1;
+        }
+
+        .taiji-bg {
+            position: absolute;
+            font-size: 120px;
+            opacity: 0.1;
+            animation: rotate 20s infinite linear;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .info-card {
+            background: rgba(26, 10, 46, 0.8);
+            border: 2px solid #d4af37;
+            border-radius: 12px;
+            box-shadow: 0 0 30px rgba(212, 175, 55, 0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .bazi-box {
+            background: linear-gradient(135deg, #6a0572 0%, #2d0a4e 100%);
+            border: 2px solid #d4af37;
+            border-radius: 8px;
+            padding: 16px;
+            text-align: center;
+            min-height: 80px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.3);
+        }
+
+        .bazi-item {
+            color: #d4af37;
+            font-weight: bold;
+            font-size: 1.125rem;
+        }
+
+        .bazi-label {
+            color: #c8a882;
+            font-size: 0.875rem;
+            margin-top: 4px;
+        }
+
+        .wuxing-item {
+            background: rgba(106, 5, 114, 0.3);
+            border-left: 4px solid #d4af37;
+            padding: 12px;
+            border-radius: 4px;
+            margin-bottom: 8px;
+        }
+
+        .wuxing-label {
+            color: #d4af37;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+
+        .wuxing-bar {
+            background: rgba(212, 175, 55, 0.2);
+            height: 6px;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .wuxing-fill {
+            background: linear-gradient(90deg, #d4af37, #8b1ba8);
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.8s ease;
+        }
+
+        .btn-mystical {
+            background: linear-gradient(135deg, #6a0572 0%, #8b1ba8 100%);
+            box-shadow: 0 0 20px rgba(106, 5, 114, 0.5);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-mystical:hover {
+            box-shadow: 0 0 40px rgba(106, 5, 114, 0.8),
+                        0 0 60px rgba(212, 175, 55, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .btn-mystical:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .spinner {
+            border: 4px solid rgba(212, 175, 55, 0.3);
+            border-top: 4px solid #d4af37;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .input-mystical {
+            background: rgba(106, 5, 114, 0.2);
+            border: 2px solid #6a0572;
+            color: #fff;
+            transition: all 0.3s ease;
+        }
+
+        .input-mystical:focus {
+            border-color: #d4af37;
+            background: rgba(106, 5, 114, 0.3);
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.3);
+            outline: none;
+        }
+
+        .input-mystical::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #d4af37, #8b1ba8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .fate-tag {
+            display: inline-block;
+            background: linear-gradient(135deg, #6a0572, #8b1ba8);
+            color: #d4af37;
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 1px solid #d4af37;
+            font-weight: bold;
+            margin: 4px 8px 4px 0;
+        }
+
+        .fortune-meter {
+            margin: 16px 0;
+        }
+
+        .fortune-label {
+            color: #d4af37;
+            font-weight: bold;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .fortune-bar {
+            background: rgba(212, 175, 55, 0.2);
+            height: 10px;
+            border-radius: 5px;
+            overflow: hidden;
+            border: 1px solid #d4af37;
+        }
+
+        .fortune-fill {
+            height: 100%;
+            border-radius: 5px;
+            transition: width 0.8s ease;
+        }
+
+        .fortune-fill.good {
+            background: linear-gradient(90deg, #4ade80, #10b981);
+        }
+
+        .fortune-fill.neutral {
+            background: linear-gradient(90deg, #f59e0b, #d97706);
+        }
+
+        .fortune-fill.poor {
+            background: linear-gradient(90deg, #ef4444, #dc2626);
+        }
+
+        .lang-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 100;
+        }
+
+        .lang-btn {
+            background: linear-gradient(135deg, #6a0572, #8b1ba8);
+            border: 1px solid #d4af37;
+            color: #d4af37;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            margin: 0 4px;
+        }
+
+        .lang-btn.active {
+            background: #d4af37;
+            color: #6a0572;
+        }
+
+        .lang-btn:hover {
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: #d4af37;
+            margin: 24px 0 16px 0;
+            padding-bottom: 12px;
+            border-bottom: 2px solid rgba(212, 175, 55, 0.3);
+        }
+
+        .detail-item {
+            margin-bottom: 16px;
+            padding: 12px;
+            background: rgba(106, 5, 114, 0.2);
+            border-radius: 8px;
+        }
+
+        .detail-title {
+            color: #d4af37;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .detail-content {
+            color: #e0d5c7;
+            line-height: 1.6;
+            font-size: 0.95rem;
+        }
+
+        @media (max-width: 768px) {
+            .title-font {
+                font-size: 1.875rem;
+            }
+
+            .bazi-box {
+                min-height: 70px;
+                padding: 12px;
+            }
+
+            .lang-toggle {
+                top: 10px;
+                right: 10px;
+            }
+
+            .lang-btn {
+                padding: 6px 12px;
+                font-size: 0.875rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Language Toggle -->
+    <div class="lang-toggle">
+        <button class="lang-btn active" onclick="setLanguage('en')" id="langBtnEn">English</button>
+        <button class="lang-btn" onclick="setLanguage('zh')" id="langBtnZh">中文</button>
+    </div>
+
+    <div class="content-wrapper min-h-screen py-8 px-4">
+        <div class="taiji-bg fixed top-10 right-10">☯</div>
+        <div class="taiji-bg fixed bottom-20 left-10" style="animation-direction: reverse;">☯</div>
+
+        <div class="max-w-4xl mx-auto">
+            <!-- Header -->
+            <div class="text-center mb-12">
+                <h1 class="title-font text-5xl md:text-6xl font-bold mb-3 gradient-text" id="headerTitle">✨ Birth Chart Reading ✨</h1>
+                <p class="text-purple-300 text-lg" id="headerSubtitle">Ancient Wisdom, Modern Insights</p>
+            </div>
+
+            <!-- 表单区域 -->
+            <div class="info-card p-8 mb-8" id="formContainer">
+                <form id="baziForm" class="space-y-6">
+                    <!-- 姓名输入 -->
+                    <div>
+                        <label class="block text-purple-200 mb-2 font-semibold" id="labelName">Your Name</label>
+                        <input
+                            type="text"
+                            id="userName"
+                            placeholder="Enter your name..."
+                            class="input-mystical w-full px-4 py-3 rounded-lg"
+                            required
+                        >
+                    </div>
+
+                    <!-- 出生信息 -->
+                    <div>
+                        <label class="block text-purple-200 mb-3 font-semibold" id="labelBirth">Birth Information (Gregorian Calendar)</label>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                            <div>
+                                <label class="text-sm text-purple-300 mb-1 block">Year</label>
+                                <input
+                                    type="number"
+                                    id="birthYear"
+                                    placeholder="1990"
+                                    min="1900"
+                                    max="2024"
+                                    class="input-mystical w-full px-4 py-3 rounded-lg"
+                                    required
+                                >
+                            </div>
+                            <div>
+                                <label class="text-sm text-purple-300 mb-1 block">Month</label>
+                                <input
+                                    type="number"
+                                    id="birthMonth"
+                                    placeholder="1-12"
+                                    min="1"
+                                    max="12"
+                                    class="input-mystical w-full px-4 py-3 rounded-lg"
+                                    required
+                                >
+                            </div>
+                            <div>
+                                <label class="text-sm text-purple-300 mb-1 block">Day</label>
+                                <input
+                                    type="number"
+                                    id="birthDay"
+                                    placeholder="1-31"
+                                    min="1"
+                                    max="31"
+                                    class="input-mystical w-full px-4 py-3 rounded-lg"
+                                    required
+                                >
+                            </div>
+                            <div>
+                                <label class="text-sm text-purple-300 mb-1 block">Hour (Chinese)</label>
+                                <select id="birthHour" class="input-mystical w-full px-4 py-3 rounded-lg" required>
+                                    <option value="">Select</option>
+                                    <option value="0">Zi (23-1)</option>
+                                    <option value="1">Chou (1-3)</option>
+                                    <option value="2">Yin (3-5)</option>
+                                    <option value="3">Mao (5-7)</option>
+                                    <option value="4">Chen (7-9)</option>
+                                    <option value="5">Si (9-11)</option>
+                                    <option value="6">Wu (11-13)</option>
+                                    <option value="7">Wei (13-15)</option>
+                                    <option value="8">Shen (15-17)</option>
+                                    <option value="9">You (17-19)</option>
+                                    <option value="10">Xu (19-21)</option>
+                                    <option value="11">Hai (21-23)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 性别选择 -->
+                    <div>
+                        <label class="block text-purple-200 mb-3 font-semibold" id="labelGender">Gender</label>
+                        <div class="flex gap-4">
+                            <label class="flex items-center cursor-pointer">
+                                <input type="radio" name="gender" value="male" class="mr-2" required>
+                                <span class="text-purple-200">♂ Male</span>
+                            </label>
+                            <label class="flex items-center cursor-pointer">
+                                <input type="radio" name="gender" value="female" class="mr-2" required>
+                                <span class="text-purple-200">♀ Female</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- 提交按钮 -->
+                    <button
+                        type="submit"
+                        class="btn-mystical w-full py-4 text-white font-bold text-lg rounded-lg"
+                        id="submitBtn"
+                    >
+                        🔮 Generate Your Chart
+                    </button>
+                </form>
+            </div>
+
+            <!-- 加载状态 -->
+            <div id="loadingContainer" class="hidden text-center mb-8">
+                <div class="spinner mx-auto mb-4"></div>
+                <p class="text-purple-300" id="loadingText">Analyzing your birth chart...</p>
+            </div>
+
+            <!-- 八字命盘显示 -->
+            <div id="resultContainer" class="hidden space-y-8">
+                <!-- 基本信息 -->
+                <div class="info-card p-8">
+                    <h2 class="text-2xl md:text-3xl font-bold gradient-text mb-6">
+                        <span id="resultName"></span>'s Birth Chart Reading
+                    </h2>
+
+                    <!-- 八字主体 -->
+                    <div class="grid grid-cols-4 gap-3 mb-8">
+                        <div class="bazi-box">
+                            <div class="text-xs text-purple-300 mb-2">Year Pillar</div>
+                            <div class="bazi-item" id="baziYear">—</div>
+                            <div class="bazi-label" id="baziYearGan">—</div>
+                        </div>
+                        <div class="bazi-box">
+                            <div class="text-xs text-purple-300 mb-2">Month Pillar</div>
+                            <div class="bazi-item" id="baziMonth">—</div>
+                            <div class="bazi-label" id="baziMonthGan">—</div>
+                        </div>
+                        <div class="bazi-box">
+                            <div class="text-xs text-purple-300 mb-2">Day Pillar</div>
+                            <div class="bazi-item" id="baziDay">—</div>
+                            <div class="bazi-label" id="baziDayGan">—</div>
+                        </div>
+                        <div class="bazi-box">
+                            <div class="text-xs text-purple-300 mb-2">Hour Pillar</div>
+                            <div class="bazi-item" id="baziHour">—</div>
+                            <div class="bazi-label" id="baziHourGan">—</div>
+                        </div>
+                    </div>
+
+                    <!-- 五行分析 -->
+                    <div class="border-t border-purple-500 pt-6">
+                        <h3 class="text-lg font-semibold text-purple-200 mb-4" id="sectionWuxing">🔥 Five Elements Analysis</h3>
+                        <div class="space-y-3">
+                            <div class="wuxing-item">
+                                <div class="wuxing-label">🔴 Fire</div>
+                                <div class="wuxing-bar">
+                                    <div class="wuxing-fill" id="fireBar" style="width: 0%"></div>
+                                </div>
+                                <div class="text-xs text-purple-300 mt-2" id="fireText">—</div>
+                            </div>
+                            <div class="wuxing-item">
+                                <div class="wuxing-label">🟫 Earth</div>
+                                <div class="wuxing-bar">
+                                    <div class="wuxing-fill" id="earthBar" style="width: 0%"></div>
+                                </div>
+                                <div class="text-xs text-purple-300 mt-2" id="earthText">—</div>
+                            </div>
+                            <div class="wuxing-item">
+                                <div class="wuxing-label">🟡 Metal</div>
+                                <div class="wuxing-bar">
+                                    <div class="wuxing-fill" id="metalBar" style="width: 0%"></div>
+                                </div>
+                                <div class="text-xs text-purple-300 mt-2" id="metalText">—</div>
+                            </div>
+                            <div class="wuxing-item">
+                                <div class="wuxing-label">💧 Water</div>
+                                <div class="wuxing-bar">
+                                    <div class="wuxing-fill" id="waterBar" style="width: 0%"></div>
+                                </div>
+                                <div class="text-xs text-purple-300 mt-2" id="waterText">—</div>
+                            </div>
+                            <div class="wuxing-item">
+                                <div class="wuxing-label">🌳 Wood</div>
+                                <div class="wuxing-bar">
+                                    <div class="wuxing-fill" id="woodBar" style="width: 0%"></div>
+                                </div>
+                                <div class="text-xs text-purple-300 mt-2" id="woodText">—</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 命格分析 -->
+                <div class="info-card p-8">
+                    <h3 class="text-lg font-semibold text-purple-200 mb-4" id="sectionFate">⭐ Destiny Profile</h3>
+                    <div class="mb-4">
+                        <div id="fateTagsContainer" class="mb-4"></div>
+                    </div>
+
+                    <!-- 吉凶指数 -->
+                    <div class="fortune-meter">
+                        <div class="fortune-label">
+                            <span id="labelFortune">Fortune Index</span>
+                            <span id="fortuneScore">50/100</span>
+                        </div>
+                        <div class="fortune-bar">
+                            <div class="fortune-fill neutral" id="fortuneFill" style="width: 50%"></div>
+                        </div>
+                    </div>
+
+                    <div class="fortune-meter">
+                        <div class="fortune-label">
+                            <span id="labelDestiny">Life Strength</span>
+                            <span id="destinyScore">50/100</span>
+                        </div>
+                        <div class="fortune-bar">
+                            <div class="fortune-fill neutral" id="destinyFill" style="width: 50%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 详细解读 -->
+                <div class="info-card p-8">
+                    <div id="detailedReadings"></div>
+                </div>
+
+                <!-- 重新测算按钮 -->
+                <button
+                    onclick="location.reload()"
+                    class="btn-mystical w-full py-3 text-white font-bold rounded-lg"
+                    id="btnRestart"
+                >
+                    🔄 New Reading
+                </button>
+            </div>
+
+            <!-- 错误提示 -->
+            <div id="errorContainer" class="hidden">
+                <div class="bg-red-900 bg-opacity-50 border border-red-500 rounded-lg p-6 text-red-200">
+                    <p id="errorText"></p>
+                    <button
+                        onclick="document.getElementById('errorContainer').classList.add('hidden')"
+                        class="mt-4 px-4 py-2 bg-red-700 hover:bg-red-600 rounded-lg"
+                        id="btnClose"
+                    >
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentLanguage = 'en';
+
+        const translations = {
+            en: {
+                headerTitle: '✨ Birth Chart Reading ✨',
+                headerSubtitle: 'Ancient Wisdom, Modern Insights',
+                labelName: 'Your Name',
+                labelBirth: 'Birth Information (Gregorian Calendar)',
+                labelGender: 'Gender',
+                submitBtn: '🔮 Generate Your Chart',
+                loadingText: 'Analyzing your birth chart...',
+                resultTitle: "'s Birth Chart Reading",
+                sectionWuxing: '🔥 Five Elements Analysis',
+                sectionFate: '⭐ Destiny Profile',
+                labelFortune: 'Fortune Index',
+                labelDestiny: 'Life Strength',
+                btnRestart: '🔄 New Reading',
+                btnClose: 'Close'
+            },
+            zh: {
+                headerTitle: '✨ 生辰八字命盘 ✨',
+                headerSubtitle: '以天地之数，启智慧之光',
+                labelName: '您的姓名',
+                labelBirth: '出生信息（阳历）',
+                labelGender: '性别',
+                submitBtn: '🔮 生成命盘',
+                loadingText: '正在推演命盘...',
+                resultTitle: '的生辰八字',
+                sectionWuxing: '🔥 五行分析',
+                sectionFate: '⭐ 命格信息',
+                labelFortune: '吉祥指数',
+                labelDestiny: '运势强度',
+                btnRestart: '🔄 重新测算',
+                btnClose: '关闭'
+            }
+        };
+
+        const TIAN_GAN = ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸'];
+        const DI_ZHI = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
+
+        const WUXING_MAP = {
+            甲: 'wood', 乙: 'wood',
+            丙: 'fire', 丁: 'fire',
+            戊: 'earth', 己: 'earth',
+            庚: 'metal', 辛: 'metal',
+            壬: 'water', 癸: 'water'
+        };
+
+        const WUXING_ZHI = {
+            子: 'water', 丑: 'earth',
+            寅: 'wood', 卯: 'wood',
+            辰: 'earth', 巳: 'fire',
+            午: 'fire', 未: 'earth',
+            申: 'metal', 酉: 'metal',
+            戌: 'earth', 亥: 'water'
+        };
+
+        // 详细的英文解读库
+        const EN_READINGS = {
+            overall_high: [
+                "You possess exceptional energy and natural charisma. Your birth chart indicates strong celestial support, suggesting a destiny filled with opportunities and achievements. Your life path is marked by positive influences that help you overcome obstacles with grace.",
+                "Your chart shows remarkable balance and harmony. This suggests a well-rounded personality with the ability to adapt to various situations. Success comes naturally to you, though it requires consistent effort and focus.",
+                "Your birth configuration indicates a life of abundance and fulfillment. Strong vital energy suggests you can manifest your dreams into reality. Others are naturally drawn to your presence and wisdom."
+            ],
+            overall_medium: [
+                "Your chart reveals a person of moderate strength with considerable potential. While challenges may appear, your wisdom and persistence will guide you through. Growth and development are key themes in your life.",
+                "Balance characterizes your destiny. Your strengths and weaknesses are well-matched, suggesting a life of learning and self-improvement. Success requires focus and strategic planning.",
+                "You have the tools to create a meaningful life. Your chart indicates that through dedication and emotional intelligence, you can achieve your goals and help others along the way."
+            ],
+            overall_low: [
+                "Your chart suggests a soul destined for deep learning through life's challenges. These difficulties are not punishments but opportunities for spiritual growth and transformation.",
+                "Though obstacles may test your resolve, your chart indicates inner strength and resilience. Your greatest achievements will come from overcoming adversity with courage.",
+                "Your destiny calls for patience and wisdom. Build solid foundations through hard work, and you will create lasting success. Help from mentors and guides will appear when needed most."
+            ],
+            love_excellent: [
+                "Love comes naturally to you. Your chart indicates strong romantic potential with multiple opportunities for deep, meaningful relationships. Your partner will greatly admire your qualities.",
+                "Your emotional nature is open and warm. You'll attract partners who appreciate your tenderness and loyalty. Marriage brings stability and joy.",
+                "Romantic fortune smiles upon you. Whether married or single, meaningful connections are within your grasp. Your capacity for devotion ensures lasting partnerships."
+            ],
+            love_good: [
+                "Relationships will develop steadily in your life. Your chart shows good compatibility potential. Take time to choose partners who share your values.",
+                "Your emotional balance is a strength. You attract people through your sincerity. Successful partnerships require clear communication and mutual respect.",
+                "Love requires effort but brings rewards. Your chart suggests meaningful connections are possible. Be patient; the right person will arrive at the right time."
+            ],
+            love_challenging: [
+                "Relationships may require more work and patience. Use this period for self-discovery and emotional growth. When love arrives, it will be deeply meaningful.",
+                "Your chart suggests learning important lessons through relationships. These experiences shape your character and wisdom.",
+                "Love may come late, but when it does, it will be profound. Focus on self-love and personal development first."
+            ],
+            career_excellent: [
+                "Career success is written in your chart. You have natural leadership qualities and business acumen. Multiple paths to prominence are available to you.",
+                "Your professional chart shows exceptional potential. Promotion and recognition are likely. Your talents are valued and sought after.",
+                "Financial prosperity and career advancement are indicated. Your work brings both material success and personal fulfillment."
+            ],
+            career_good: [
+                "Your career chart shows steady progress. Success comes through consistent effort and skill development. Promotions will arrive with perseverance.",
+                "Professional opportunities abound. Your abilities match the market demands. Focus on building expertise in your chosen field.",
+                "Work stability is indicated. Income grows steadily. Career satisfaction comes through choosing fields aligned with your talents."
+            ],
+            career_moderate: [
+                "Career development requires patience and strategic planning. Multiple career changes may occur. Each brings valuable experience.",
+                "Your chart suggests success in fields requiring creativity and communication. Choose work that utilizes your unique strengths.",
+                "Financial growth is possible through diverse income streams. Avoid putting all energy into one career path."
+            ],
+            wealth_strong: [
+                "Financial fortune is evident in your chart. Wealth accumulates naturally. Investments and business ventures favor you.",
+                "Your chart indicates good fortune in money matters. Prosperity comes both from hard work and fortunate circumstances.",
+                "Abundance flows to you. Money matters resolve favorably. Financial security is within your reach."
+            ],
+            wealth_moderate: [
+                "Steady financial growth is indicated. Prosperity comes through diligent work and smart financial decisions.",
+                "Your chart shows good earning potential. Income grows with effort and planning. Avoid excessive risk-taking.",
+                "Financial stability is achievable through prudence and saving. Multiple income opportunities exist."
+            ],
+            wealth_challenging: [
+                "Financial growth requires conscious effort and wise management. Avoid impulsive spending and risky investments.",
+                "Your chart suggests learning important lessons about money. Build wealth gradually through consistent saving.",
+                "Financial improvement comes through focused strategy. Seek professional advice for investments."
+            ],
+            health_excellent: [
+                "Your chart indicates robust health and vitality. Longevity is suggested. Your physical constitution is strong.",
+                "Energy and stamina characterize your health. Minor illnesses pass quickly. Your body heals well.",
+                "Life force is strong. Health challenges, if any, are temporary. Preventive care maintains your wellness."
+            ],
+            health_good: [
+                "General health is stable. Regular exercise and proper nutrition keep you well. Energy levels are good.",
+                "Your chart suggests good constitutional health. Attention to lifestyle choices maintains wellness.",
+                "Minor health issues may occur but resolve easily. Prevention through good habits serves you well."
+            ],
+            health_needs_care: [
+                "Health requires conscious attention. Regular check-ups and lifestyle modifications are beneficial.",
+                "Your chart suggests building health through consistent care. Traditional remedies may complement modern medicine.",
+                "Energy levels fluctuate. Rest and recovery are important. Avoid overwork and stress."
+            ]
+        };
+
+        // 详细的中文解读库
+        const ZH_READINGS = {
+            overall_high: [
+                "你禀赋聪慧，命中贵人众多，天赐吉祥。八字搭配协调，预示前程似锦，事事顺遂。你具有超群的领导力和魅力，能够在人生各个阶段取得显著成就。",
+                "你的命盘显示五行生克有序，阴阳平衡。此命局之人聪慧过人，遇事能逢凶化吉。虽需付出努力，但成功终会如约而至。",
+                "命理显示你福泽深厚，贵气十足。人生路上贵人相助，机遇频现。你的人生充满希望与光明。"
+            ],
+            overall_medium: [
+                "你的八字显示中等命格。人生如常，需通过自身努力而获得成就。困难与机遇并存，关键在于把握机会与坚持不懈。",
+                "八字平衡，预示人生稳健。你具有适应能力强的特点。成功来自勤奋与智慧的结合。",
+                "命盘显示你拥有改造命运的能力。通过后天修养与奋斗，可创造理想人生。"
+            ],
+            overall_low: [
+                "你的命盘提示人生需经历更多磨砺。但磨难即为修行，困难中见成长。坚持与忍耐是你的法宝。",
+                "命数多坎坷，宜静观其变，不可急躁。困难时期正是积累力量的阶段。他人扶持与贵人相助会在关键时刻出现。",
+                "人生路需脚踏实地，一步一个脚印。虽现阶段困难，但通过修养与积累，终能化险为夷。"
+            ],
+            love_excellent: [
+                "桃花运旺，感情宫位显示异性缘深。你的温柔与体贴会吸引理想伴侣。婚姻生活和谐美满。",
+                "情感运势良好，易得良缘。不论男女，都具有吸引异性的魅力。感情生活丰富充实。",
+                "八字显示感情圆满。能遇见懂你的人，婚姻幸福，家庭和睦。"
+            ],
+            love_good: [
+                "感情运稳定，会遇见真心对待你的人。婚后需多沟通理解，方能偕老。",
+                "感情缘分中等，通过珍惜眼前人，可获得幸福。不宜过分挑剔，真诚对待伴侣。",
+                "爱情需要用心经营。你的真挚与忠诚会被欣赏。"
+            ],
+            love_challenging: [
+                "感情运势需自身修养。宜先完善自己，吸引志同道合的人。",
+                "感情缘分较晚，但若珍惜，可得真爱。不宜强求，顺其自然。",
+                "感情路较坎坷，需有耐心等待。修行自己，提升内在修养，缘分自会到来。"
+            ],
+            career_excellent: [
+                "事业运势强劲，升迁机会多。你具有管理才能与商业眼光，事业发展突出。",
+                "工作能力得到认可，晋升快速。你的才华在职场中闪闪发光。",
+                "事业前景光明，财源滚滚来。多个发展机会等着你去把握。"
+            ],
+            career_good: [
+                "事业运稳定上升。通过持续努力，能获得理想职位与薪资。",
+                "工作机会较多，需把握时机。你的专业能力能为你带来成功。",
+                "事业发展平稳，收入稳定。继续积累经验，前景光明。"
+            ],
+            career_moderate: [
+                "事业需耐心积累，可能涉及多次转换。每次经历都增加你的智慧。",
+                "适合从事创意性与沟通性工作。发挥自身特长，事业成就可观。",
+                "事业成长需时间，不可急功近利。多元化发展有利于财富增长。"
+            ],
+            wealth_strong: [
+                "财运旺盛，意外之财不断。投资与做生意运势良好。财富累积快速。",
+                "钱财如流水，但也容易散去。宜投资理财，让财富增长。",
+                "命中财源广进。无论何种赚钱方式，都能有所收获。"
+            ],
+            wealth_moderate: [
+                "财运平稳，收入稳定。存钱与投资相结合，财富稳步增长。",
+                "靠辛劳获得财富。理财能力强，能避免大的经济风险。",
+                "财富积累需时间与耐心。通过稳健的方法，可实现经济自由。"
+            ],
+            wealth_challenging: [
+                "财运欠佳，需谨慎理财。避免盲目投资与高风险操作。",
+                "钱财易来易去，宜控制开支。培养储蓄的习惯很重要。",
+                "财运需通过勤奋工作而改善。坚持储蓄，财富会慢慢积累。"
+            ],
+            health_excellent: [
+                "身体素质优良，元气充足。体质强壮，抵抗力强。寿元悠长。",
+                "健康是最大的福报。你具有强健的体魄与充沛的精力。",
+                "气血旺盛，精力充沛。即使偶有小恙，也易康复。"
+            ],
+            health_good: [
+                "身体健康状况良好。定期锻炼与注意饮食，可保持健康。",
+                "体质一般但稳定。预防保健很重要，可避免大病。",
+                "无大碍，只需按时体检与适度运动。"
+            ],
+            health_needs_care: [
+                "身体需特别关照。定期体检，及早发现问题。",
+                "体质较弱，需加强调理。中医药膳与适度锻炼有益。",
+                "宜重视养生，谨慎起居。避免过度劳累。"
+            ]
+        };
+
+        function setLanguage(lang) {
+            currentLanguage = lang;
+            document.getElementById('langBtnEn').classList.toggle('active', lang === 'en');
+            document.getElementById('langBtnZh').classList.toggle('active', lang === 'zh');
+
+            const trans = translations[lang];
+            document.getElementById('headerTitle').textContent = trans.headerTitle;
+            document.getElementById('headerSubtitle').textContent = trans.headerSubtitle;
+            document.getElementById('labelName').textContent = trans.labelName;
+            document.getElementById('labelBirth').textContent = trans.labelBirth;
+            document.getElementById('labelGender').textContent = trans.labelGender;
+            document.getElementById('submitBtn').textContent = trans.submitBtn;
+            document.getElementById('loadingText').textContent = trans.loadingText;
+            document.getElementById('sectionWuxing').textContent = trans.sectionWuxing;
+            document.getElementById('sectionFate').textContent = trans.sectionFate;
+            document.getElementById('labelFortune').textContent = trans.labelFortune;
+            document.getElementById('labelDestiny').textContent = trans.labelDestiny;
+            document.getElementById('btnRestart').textContent = trans.btnRestart;
+            document.getElementById('btnClose').textContent = trans.btnClose;
+        }
+
+        function getGanZhi(year, month, day, hour) {
+            const yearGan = TIAN_GAN[(year - 1900) % 10];
+            const yearZhi = DI_ZHI[(year - 1900) % 12];
+
+            const monthGanIndex = ((year - 1900) * 2 + month - 1) % 10;
+            const monthGan = TIAN_GAN[monthGanIndex];
+            const monthZhi = DI_ZHI[(month + 1) % 12 || 12];
+
+            const days = new Date(year, month - 1, day).getDate();
+            const dayGanIndex = (year * 0.2422 + month * 1.6278 + days - 1) % 10;
+            const dayGan = TIAN_GAN[Math.floor(dayGanIndex)];
+            const dayZhi = DI_ZHI[((days - 1) % 12)];
+
+            const hourIndex = hour % 12;
+            const hourGan = TIAN_GAN[(dayGanIndex * 2 + hourIndex) % 10];
+            const hourZhi = DI_ZHI[hourIndex];
+
+            return {
+                year: yearGan + yearZhi,
+                month: monthGan + monthZhi,
+                day: dayGan + dayZhi,
+                hour: hourGan + hourZhi
+            };
+        }
+
+        function countWuxing(baziData) {
+            const count = {
+                fire: 0, earth: 0, metal: 0, water: 0, wood: 0
+            };
+
+            [baziData.year[0], baziData.month[0], baziData.day[0], baziData.hour[0]].forEach(char => {
+                const wuxing = WUXING_MAP[char];
+                if (wuxing) count[wuxing]++;
+            });
+
+            [baziData.year[1], baziData.month[1], baziData.day[1], baziData.hour[1]].forEach(char => {
+                const wuxing = WUXING_ZHI[char];
+                if (wuxing) count[wuxing]++;
+            });
+
+            return count;
+        }
+
+        function analyzeFate(baziData, wuxingCount, gender) {
+            const total = Object.values(wuxingCount).reduce((a, b) => a + b, 0);
+
+            const fireRatio = wuxingCount.fire / total;
+            const earthRatio = wuxingCount.earth / total;
+            const metalRatio = wuxingCount.metal / total;
+            const waterRatio = wuxingCount.water / total;
+            const woodRatio = wuxingCount.wood / total;
+
+            let fortuneScore = 50;
+            const balance = 1 - Math.max(
+                Math.abs(fireRatio - 0.2),
+                Math.abs(earthRatio - 0.2),
+                Math.abs(metalRatio - 0.2),
+                Math.abs(waterRatio - 0.2),
+                Math.abs(woodRatio - 0.2)
+            );
+
+            fortuneScore = Math.floor(50 + balance * 50);
+            const destinyScore = Math.floor(30 + (wuxingCount.water + wuxingCount.metal) * 8);
+
+            const fateType = [];
+            if (fireRatio > 0.3) fateType.push(currentLanguage === 'en' ? 'Fire Dominant' : '火旺');
+            if (waterRatio > 0.3) fateType.push(currentLanguage === 'en' ? 'Water Dominant' : '水旺');
+            if (woodRatio > 0.3) fateType.push(currentLanguage === 'en' ? 'Wood Dominant' : '木旺');
+            if (fireRatio < 0.1) fateType.push(currentLanguage === 'en' ? 'Fire Weak' : '火弱');
+            if (waterRatio < 0.1) fateType.push(currentLanguage === 'en' ? 'Water Weak' : '水弱');
+
+            if (gender === 'male' && fireRatio > 0.2) fateType.push(currentLanguage === 'en' ? 'Strong Drive' : '事业心强');
+            if (gender === 'female' && waterRatio > 0.2) fateType.push(currentLanguage === 'en' ? 'Gentle Nature' : '温柔体贴');
+
+            return {
+                fortuneScore: Math.min(100, fortuneScore),
+                destinyScore: Math.min(100, destinyScore),
+                fateType: fateType.length > 0 ? fateType : [currentLanguage === 'en' ? 'Balanced' : '五行平衡'],
+                wuxingRatios: { fireRatio, earthRatio, metalRatio, waterRatio, woodRatio }
+            };
+        }
+
+        function generateDetailedReadings(baziData, wuxingCount, fateAnalysis, gender) {
+            const readings = currentLanguage === 'en' ? EN_READINGS : ZH_READINGS;
+            const lang = currentLanguage;
+
+            let html = '';
+
+            // 总体运势
+            const fortuneLevel = fateAnalysis.fortuneScore >= 70 ? 'high' : fateAnalysis.fortuneScore >= 40 ? 'medium' : 'low';
+            const overallKey = `overall_${fortuneLevel}`;
+            html += createDetailSection(
+                lang === 'en' ? '🌟 Overall Destiny' : '🌟 总体运势',
+                readings[overallKey][Math.floor(Math.random() * readings[overallKey].length)]
+            );
+
+            // 婚姻感情
+            const loveLevel = wuxingCount.fire > 2 || wuxingCount.water > 2 ? 'excellent' : wuxingCount.fire > 0 || wuxingCount.water > 0 ? 'good' : 'challenging';
+            const loveKey = `love_${loveLevel}`;
+            html += createDetailSection(
+                lang === 'en' ? '💕 Love & Marriage' : '💕 婚姻与感情',
+                readings[loveKey][Math.floor(Math.random() * readings[loveKey].length)],
+                gender === 'male' ? (lang === 'en' ? 'For Men' : '男性') : (lang === 'en' ? 'For Women' : '女性')
+            );
+
+            // 事业财运
+            const careerLevel = wuxingCount.metal > 1 ? 'excellent' : wuxingCount.metal > 0 || wuxingCount.wood > 1 ? 'good' : 'moderate';
+            const careerKey = `career_${careerLevel}`;
+            html += createDetailSection(
+                lang === 'en' ? '💼 Career & Business' : '💼 事业与工作',
+                readings[careerKey][Math.floor(Math.random() * readings[careerKey].length)]
+            );
+
+            // 财富运势
+            const wealthLevel = wuxingCount.metal + wuxingCount.earth > 2 ? 'strong' : wuxingCount.metal + wuxingCount.earth > 0 ? 'moderate' : 'challenging';
+            const wealthKey = `wealth_${wealthLevel}`;
+            html += createDetailSection(
+                lang === 'en' ? '💰 Wealth & Finances' : '💰 财富与金钱',
+                readings[wealthKey][Math.floor(Math.random() * readings[wealthKey].length)]
+            );
+
+            // 健康运势
+            const healthLevel = wuxingCount.wood + wuxingCount.water > 2 ? 'excellent' : wuxingCount.wood + wuxingCount.water > 0 ? 'good' : 'needs_care';
+            const healthKey = `health_${healthLevel}`;
+            html += createDetailSection(
+                lang === 'en' ? '💪 Health & Wellness' : '💪 身体健康',
+                readings[healthKey][Math.floor(Math.random() * readings[healthKey].length)]
+            );
+
+            // 个人特质
+            const traits = lang === 'en' ?
+                [
+                    fireRatio > 0.2 ? 'Passionate and driven' : 'Calm and thoughtful',
+                    waterRatio > 0.2 ? 'Intuitive and sensitive' : 'Practical and grounded',
+                    woodRatio > 0.2 ? 'Growth-oriented and ambitious' : 'Stable and reliable'
+                ] :
+                [
+                    fateAnalysis.wuxingRatios.fireRatio > 0.2 ? '热情有干劲' : '沉着冷静',
+                    fateAnalysis.wuxingRatios.waterRatio > 0.2 ? '直觉敏锐' : '脚踏实地',
+                    fateAnalysis.wuxingRatios.woodRatio > 0.2 ? '进取心强' : '稳定可靠'
+                ];
+
+            html += createDetailSection(
+                lang === 'en' ? '✨ Key Personal Traits' : '✨ 个人特质',
+                traits.join(lang === 'en' ? ' • ' : '、')
+            );
+
+            // 建议与忠告
+            const suggestions = lang === 'en' ?
+                [
+                    'Cultivate inner peace through meditation or mindfulness practices',
+                    'Build strong relationships based on trust and honesty',
+                    'Make decisions aligned with your core values',
+                    'Embrace challenges as opportunities for growth',
+                    'Practice gratitude daily to attract positive energy'
+                ] :
+                [
+                    '通过冥想修养身心，提升精神境界',
+                    '重视人际关系，诚心待人',
+                    '做出决定时，应符合自己的价值观',
+                    '把困难看作成长的机会',
+                    '每日感恩，吸引正面能量'
+                ];
+
+            html += createDetailSection(
+                lang === 'en' ? '💡 Guidance & Recommendations' : '💡 建议与忠告',
+                suggestions.map(s => (lang === 'en' ? '• ' : '• ') + s).join('\n')
+            );
+
+            return html;
+        }
+
+        function createDetailSection(title, content, subtitle = '') {
+            return `
+                <div class="detail-item">
+                    <div class="detail-title">${title}${subtitle ? ' <span style="font-size: 0.875rem; color: #c8a882;">(' + subtitle + ')</span>' : ''}</div>
+                    <div class="detail-content">${content.replace(/\n/g, '<br>')}</div>
+                </div>
+            `;
+        }
+
+        document.getElementById('baziForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const name = document.getElementById('userName').value.trim();
+            const year = parseInt(document.getElementById('birthYear').value);
+            const month = parseInt(document.getElementById('birthMonth').value);
+            const day = parseInt(document.getElementById('birthDay').value);
+            const hour = parseInt(document.getElementById('birthHour').value);
+            const gender = document.querySelector('input[name="gender"]:checked').value;
+
+            if (!name || !year || !month || !day || hour === '' || !gender) {
+                showError(currentLanguage === 'en' ? 'Please fill in all required information' : '请完整填写所有信息');
+                return;
+            }
+
+            document.getElementById('baziForm').parentElement.classList.add('hidden');
+            document.getElementById('loadingContainer').classList.remove('hidden');
+
+            setTimeout(() => {
+                try {
+                    const baziData = getGanZhi(year, month, day, hour);
+                    const wuxingCount = countWuxing(baziData);
+                    const fateAnalysis = analyzeFate(baziData, wuxingCount, gender);
+
+                    showResult(name, baziData, wuxingCount, fateAnalysis, gender);
+                } catch (error) {
+                    console.error('Error:', error);
+                    showError(currentLanguage === 'en' ? 'Calculation failed. Please check your input.' : '计算失败，请检查输入信息');
+                    document.getElementById('baziForm').parentElement.classList.remove('hidden');
+                    document.getElementById('loadingContainer').classList.add('hidden');
+                }
+            }, 1500);
+        });
+
+        function showResult(name, baziData, wuxingCount, fateAnalysis, gender) {
+            document.getElementById('loadingContainer').classList.add('hidden');
+            document.getElementById('resultContainer').classList.remove('hidden');
+
+            document.getElementById('resultName').textContent = name;
+
+            document.getElementById('baziYear').textContent = baziData.year;
+            document.getElementById('baziMonth').textContent = baziData.month;
+            document.getElementById('baziDay').textContent = baziData.day;
+            document.getElementById('baziHour').textContent = baziData.hour;
+
+            const ganZhiLabels = {
+                year: baziData.year[0],
+                month: baziData.month[0],
+                day: baziData.day[0],
+                hour: baziData.hour[0]
+            };
+            document.getElementById('baziYearGan').textContent = ganZhiLabels.year;
+            document.getElementById('baziMonthGan').textContent = ganZhiLabels.month;
+            document.getElementById('baziDayGan').textContent = ganZhiLabels.day;
+            document.getElementById('baziHourGan').textContent = ganZhiLabels.hour;
+
+            const total = Object.values(wuxingCount).reduce((a, b) => a + b, 0);
+            const firePercent = (wuxingCount.fire / total) * 100;
+            const earthPercent = (wuxingCount.earth / total) * 100;
+            const metalPercent = (wuxingCount.metal / total) * 100;
+            const waterPercent = (wuxingCount.water / total) * 100;
+            const woodPercent = (wuxingCount.wood / total) * 100;
+
+            document.getElementById('fireBar').style.width = firePercent + '%';
+            document.getElementById('earthBar').style.width = earthPercent + '%';
+            document.getElementById('metalBar').style.width = metalPercent + '%';
+            document.getElementById('waterBar').style.width = waterPercent + '%';
+            document.getElementById('woodBar').style.width = woodPercent + '%';
+
+            const fireLabel = currentLanguage === 'en' ? 'Fire' : '丙丁火';
+            const earthLabel = currentLanguage === 'en' ? 'Earth' : '戊己土';
+            const metalLabel = currentLanguage === 'en' ? 'Metal' : '庚辛金';
+            const waterLabel = currentLanguage === 'en' ? 'Water' : '壬癸水';
+            const woodLabel = currentLanguage === 'en' ? 'Wood' : '甲乙木';
+
+            document.getElementById('fireText').textContent = `${fireLabel}: ${wuxingCount.fire}`;
+            document.getElementById('earthText').textContent = `${earthLabel}: ${wuxingCount.earth}`;
+            document.getElementById('metalText').textContent = `${metalLabel}: ${wuxingCount.metal}`;
+            document.getElementById('waterText').textContent = `${waterLabel}: ${wuxingCount.water}`;
+            document.getElementById('woodText').textContent = `${woodLabel}: ${wuxingCount.wood}`;
+
+            const tagsContainer = document.getElementById('fateTagsContainer');
+            tagsContainer.innerHTML = '';
+            fateAnalysis.fateType.forEach(tag => {
+                const span = document.createElement('span');
+                span.className = 'fate-tag';
+                span.textContent = tag;
+                tagsContainer.appendChild(span);
+            });
+
+            document.getElementById('fortuneScore').textContent = fateAnalysis.fortuneScore + '/100';
+            const fortuneFill = document.getElementById('fortuneFill');
+            fortuneFill.style.width = fateAnalysis.fortuneScore + '%';
+            fortuneFill.className = 'fortune-fill ' + (fateAnalysis.fortuneScore >= 70 ? 'good' : fateAnalysis.fortuneScore >= 40 ? 'neutral' : 'poor');
+
+            document.getElementById('destinyScore').textContent = fateAnalysis.destinyScore + '/100';
+            const destinyFill = document.getElementById('destinyFill');
+            destinyFill.style.width = fateAnalysis.destinyScore + '%';
+            destinyFill.className = 'fortune-fill ' + (fateAnalysis.destinyScore >= 70 ? 'good' : fateAnalysis.destinyScore >= 40 ? 'neutral' : 'poor');
+
+            const detailedHTML = generateDetailedReadings(baziData, wuxingCount, fateAnalysis, gender);
+            document.getElementById('detailedReadings').innerHTML = detailedHTML;
+
+            setTimeout(() => {
+                document.getElementById('resultContainer').scrollIntoView({ behavior: 'smooth' });
+            }, 300);
+        }
+
+        function showError(message) {
+            document.getElementById('errorText').textContent = message;
+            document.getElementById('errorContainer').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
