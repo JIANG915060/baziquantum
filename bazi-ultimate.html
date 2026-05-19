@@ -6,6 +6,7 @@
     <title>✨ 易数量子命盤 | Bazi Quantum ✨</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://js.stripe.com/v3/"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Montserrat:wght@300;400;500;600&display=swap');
         @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;700&display=swap');
@@ -1444,12 +1445,32 @@
                 </div>
 
                 <div id="consultError" class="hidden bg-red-900 bg-opacity-50 border border-red-500 text-red-200 p-4 rounded-lg mt-6"></div>
+
+                <!-- 支付模块 -->
+                <div id="paymentModule" class="hidden bg-gradient-to-br from-amber-900 to-purple-900 p-6 rounded-lg border border-amber-600 mt-6">
+                    <h3 class="text-xl font-bold text-amber-200 mb-4">
+                        <span class="hidden-en">💎 Get Premium Consultations</span>
+                        <span class="hidden-cn">💎 升级高级咨询</span>
+                    </h3>
+                    <p class="text-amber-100 mb-6">
+                        <span class="hidden-en">Unlock unlimited AI consultations personalized to your birth chart</span>
+                        <span class="hidden-cn">解锁无限次数的AI咨询，完全个性化解读你的命盤</span>
+                    </p>
+                    <button id="stripeCheckoutBtn" class="btn-mystical w-full py-3 text-white font-bold rounded-lg">
+                        <span class="hidden-en">🔒 Proceed to Payment</span>
+                        <span class="hidden-cn">🔒 前往支付</span>
+                    </button>
+                    <p class="text-xs text-amber-300 text-center mt-4">
+                        <span class="hidden-en">Secure payment powered by Stripe</span>
+                        <span class="hidden-cn">由 Stripe 提供安全支付</span>
+                    </p>
+                </div>
             </div>
 
             <div class="metric-card mb-6 text-center">
                 <p class="text-sm text-purple-300">
-                    <span class="hidden-en">✨ Free consultations: <span id="freeCount">3</span> remaining | Future versions will feature premium counsel packages.</span>
-                    <span class="hidden-cn">✨ 免费咨询次数：剩余 <span id="freeCount">3</span> 次 | 未来版本将推出高级咨询套餐。</span>
+                    <span class="hidden-en">✨ Free consultations: <span id="freeCount">1</span> remaining | Upgrade for unlimited access</span>
+                    <span class="hidden-cn">✨ 免费咨询次数：剩余 <span id="freeCount">1</span> 次 | 升级获得无限次数</span>
                 </p>
             </div>
             `;
@@ -1461,11 +1482,42 @@
         let currentFateAnalysis = null;
 
         function initConsultation() {
-            const freeCount = localStorage.getItem('consultFreeCount') || '3';
+            const freeCount = localStorage.getItem('consultFreeCount') || '1';
             document.getElementById('freeCount').textContent = freeCount;
 
             document.getElementById('submitConsult').addEventListener('click', submitConsultation);
             document.getElementById('newConsultBtn').addEventListener('click', resetConsultation);
+            document.getElementById('stripeCheckoutBtn').addEventListener('click', handleStripeCheckout);
+        }
+
+        async function handleStripeCheckout() {
+            const stripe = Stripe('pk_live_51TQ56jBHgYSffA2mi6Y2jY215ohy04fAx6XYLgCvDUoPNivFdZWkaIDDKQhLpOd6IGTN3qtounllNcnEipImyn7o00wIh7w3Es');
+
+            try {
+                const response = await fetch('/api/create-checkout-session', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        priceId: 'prod_UXsoVc3EFEzAwS'
+                    })
+                });
+
+                const session = await response.json();
+
+                if (session.error) {
+                    showConsultError(session.error);
+                    return;
+                }
+
+                const result = await stripe.redirectToCheckout({ sessionId: session.id });
+
+                if (result.error) {
+                    showConsultError(result.error.message);
+                }
+            } catch (error) {
+                console.error('Stripe error:', error);
+                showConsultError('<span class="hidden-en">Payment error. Please try again.</span><span class="hidden-cn">支付失败，请重试。</span>');
+            }
         }
 
         async function submitConsultation() {
@@ -1476,9 +1528,11 @@
                 return;
             }
 
-            const freeCount = parseInt(localStorage.getItem('consultFreeCount') || '3');
+            const freeCount = parseInt(localStorage.getItem('consultFreeCount') || '1');
             if (freeCount <= 0) {
-                showConsultError('<span class="hidden-en">You have used all free consultations. Premium feature coming soon!</span><span class="hidden-cn">免费咨询次数已用完。高级功能即将上线！</span>');
+                document.getElementById('consultForm').classList.add('hidden');
+                document.getElementById('consultError').classList.add('hidden');
+                document.getElementById('paymentModule').classList.remove('hidden');
                 return;
             }
 

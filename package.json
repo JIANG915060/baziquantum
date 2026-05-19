@@ -1,0 +1,16 @@
+{
+  "name": "bazi-quantum",
+  "version": "1.0.0",
+  "description": "Bazi Quantum - Birth Chart AI Analysis Platform",
+  "main": "index.js",
+  "dependencies": {
+    "stripe": "^14.0.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "dev": "vercel dev",
+    "build": "vercel build"
+  },
+  "author": "Bazi Quantum",
+  "license": "MIT"
+}
