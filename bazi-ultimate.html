@@ -1399,8 +1399,141 @@
                     </span>
                 </div>
             </div>
+
+            <!-- 咨询模块 -->
+            <h2 class="module-title mt-12">
+                <span class="hidden-en">MODULE 7: LIFE DECISION COUNSEL</span>
+                <span class="hidden-cn">模块七：人生决策咨询</span>
+            </h2>
+
+            <div class="info-card p-8 mb-8" id="consultModule">
+                <div class="mb-6">
+                    <p class="text-purple-200 mb-4">
+                        <span class="hidden-en">💫 Got a major life question? Ask for wisdom guided by your birth chart energy. Our AI counsel integrates your unique astrological makeup with deep psychological insight.</span>
+                        <span class="hidden-cn">💫 有重大人生决策困扰你？获取与你命盘能量同频的智慧咨询。我们的AI咨询融合你独特的八字能量与深层心理学洞见。</span>
+                    </p>
+                </div>
+
+                <div id="consultForm" class="space-y-4">
+                    <textarea id="consultQuestion" placeholder="例：我应该选择什么样的伴侣？/ What kind of partner should I choose?" class="input-mystical w-full px-4 py-3 rounded-lg" rows="4" required></textarea>
+                    <button id="submitConsult" class="btn-mystical w-full py-3 text-white font-bold rounded-lg">
+                        <span class="hidden-en">🔮 GET AI COUNSEL</span>
+                        <span class="hidden-cn">🔮 获取AI咨询</span>
+                    </button>
+                </div>
+
+                <div id="consultLoading" class="hidden text-center my-6">
+                    <div class="spinner mx-auto mb-3"></div>
+                    <p class="text-purple-300">
+                        <span class="hidden-en">Consulting quantum wisdom...</span>
+                        <span class="hidden-cn">正在推演智慧...</span>
+                    </p>
+                </div>
+
+                <div id="consultResult" class="hidden bg-gradient-to-br from-purple-900 to-blue-900 p-6 rounded-lg border border-purple-500 mt-6">
+                    <div id="consultAnswer" class="text-purple-100 leading-relaxed"></div>
+                    <div id="consultMeta" class="text-sm text-purple-400 mt-4 pt-4 border-t border-purple-700">
+                        <span class="hidden-en">Generated at: </span>
+                        <span class="hidden-cn">生成于: </span>
+                        <span id="consultTime"></span>
+                    </div>
+                    <button id="newConsultBtn" class="btn-mystical w-full py-2 text-sm mt-4">
+                        <span class="hidden-en">✨ Ask Another Question</span>
+                        <span class="hidden-cn">✨ 再提一个问题</span>
+                    </button>
+                </div>
+
+                <div id="consultError" class="hidden bg-red-900 bg-opacity-50 border border-red-500 text-red-200 p-4 rounded-lg mt-6"></div>
+            </div>
+
+            <div class="metric-card mb-6 text-center">
+                <p class="text-sm text-purple-300">
+                    <span class="hidden-en">✨ Free consultations: <span id="freeCount">3</span> remaining | Future versions will feature premium counsel packages.</span>
+                    <span class="hidden-cn">✨ 免费咨询次数：剩余 <span id="freeCount">3</span> 次 | 未来版本将推出高级咨询套餐。</span>
+                </p>
+            </div>
             `;
             document.getElementById('ritualContainer').innerHTML = html;
+        }
+
+        // ===== CONSULTATION SYSTEM =====
+        let currentBaziData = null;
+        let currentFateAnalysis = null;
+
+        function initConsultation() {
+            const freeCount = localStorage.getItem('consultFreeCount') || '3';
+            document.getElementById('freeCount').textContent = freeCount;
+
+            document.getElementById('submitConsult').addEventListener('click', submitConsultation);
+            document.getElementById('newConsultBtn').addEventListener('click', resetConsultation);
+        }
+
+        async function submitConsultation() {
+            const question = document.getElementById('consultQuestion').value.trim();
+
+            if (!question) {
+                showConsultError('<span class="hidden-en">Please enter a question</span><span class="hidden-cn">请输入问题</span>');
+                return;
+            }
+
+            const freeCount = parseInt(localStorage.getItem('consultFreeCount') || '3');
+            if (freeCount <= 0) {
+                showConsultError('<span class="hidden-en">You have used all free consultations. Premium feature coming soon!</span><span class="hidden-cn">免费咨询次数已用完。高级功能即将上线！</span>');
+                return;
+            }
+
+            document.getElementById('consultForm').classList.add('hidden');
+            document.getElementById('consultLoading').classList.remove('hidden');
+            document.getElementById('consultError').classList.add('hidden');
+
+            try {
+                const response = await fetch('/api/consult', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        question: question,
+                        birthChart: currentBaziData ? {
+                            name: document.getElementById('userName').value,
+                            ganZhi: currentBaziData,
+                            fateAnalysis: currentFateAnalysis
+                        } : null
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Service error');
+                }
+
+                // 更新免费次数
+                const newCount = freeCount - 1;
+                localStorage.setItem('consultFreeCount', newCount.toString());
+                document.getElementById('freeCount').textContent = newCount;
+
+                document.getElementById('consultLoading').classList.add('hidden');
+                document.getElementById('consultAnswer').innerHTML = data.answer;
+                document.getElementById('consultTime').textContent = new Date(data.timestamp).toLocaleString();
+                document.getElementById('consultResult').classList.remove('hidden');
+
+            } catch (error) {
+                console.error('Consultation error:', error);
+                showConsultError(error.message);
+                document.getElementById('consultForm').classList.remove('hidden');
+            } finally {
+                document.getElementById('consultLoading').classList.add('hidden');
+            }
+        }
+
+        function resetConsultation() {
+            document.getElementById('consultQuestion').value = '';
+            document.getElementById('consultResult').classList.add('hidden');
+            document.getElementById('consultForm').classList.remove('hidden');
+        }
+
+        function showConsultError(message) {
+            document.getElementById('consultError').innerHTML = message;
+            document.getElementById('consultError').classList.remove('hidden');
         }
 
         // ===== FORM SUBMISSION =====
@@ -1424,36 +1557,41 @@
             document.getElementById('formContainer').classList.add('hidden');
             document.getElementById('loadingContainer').classList.remove('hidden');
 
-            setTimeout(() => {
-                try {
-                    const baziData = getGanZhi(year, month, day, hour);
-                    const wuxingCount = countWuxing(baziData);
-                    const fateAnalysis = analyzeFate(baziData, wuxingCount);
+            try {
+                const baziData = getGanZhi(year, month, day, hour);
+                const wuxingCount = countWuxing(baziData);
+                const fateAnalysis = analyzeFate(baziData, wuxingCount);
 
-                    renderEnergyMatrix(wuxingCount, fateAnalysis);
-                    renderVibeMetrics(fateAnalysis);
-                    renderSoulCore(fateAnalysis);
-                    renderArchetype(fateAnalysis, wuxingCount, gender);
-                    renderLoveAnalysis(baziData, fateAnalysis, gender);
-                    renderCareerAnalysis(wuxingCount, fateAnalysis);
-                    renderCosmicSeasons(year);
-                    renderRituals(fateAnalysis);
+                // 保存数据供咨询功能使用
+                currentBaziData = baziData;
+                currentFateAnalysis = fateAnalysis;
 
-                    document.getElementById('loadingContainer').classList.add('hidden');
-                    document.getElementById('resultContainer').classList.remove('hidden');
+                renderEnergyMatrix(wuxingCount, fateAnalysis);
+                renderVibeMetrics(fateAnalysis);
+                renderSoulCore(fateAnalysis);
+                renderArchetype(fateAnalysis, wuxingCount, gender);
+                renderLoveAnalysis(baziData, fateAnalysis, gender);
+                renderCareerAnalysis(wuxingCount, fateAnalysis);
+                renderCosmicSeasons(year);
+                renderRituals(fateAnalysis);
 
-                    setTimeout(() => {
-                        document.getElementById('resultContainer').scrollIntoView({ behavior: 'smooth' });
-                    }, 300);
-                } catch (error) {
-                    console.error(error);
-                    document.getElementById('errorText').innerHTML =
-                        '<span class="hidden-en">Calculation error: ' + error.message + '</span><span class="hidden-cn">计算错误: ' + error.message + '</span>';
-                    document.getElementById('errorContainer').classList.remove('hidden');
-                    document.getElementById('formContainer').classList.remove('hidden');
-                    document.getElementById('loadingContainer').classList.add('hidden');
-                }
-            }, 1500);
+                document.getElementById('loadingContainer').classList.add('hidden');
+                document.getElementById('resultContainer').classList.remove('hidden');
+
+                // 初始化咨询系统
+                initConsultation();
+
+                setTimeout(() => {
+                    document.getElementById('resultContainer').scrollIntoView({ behavior: 'smooth' });
+                }, 300);
+            } catch (error) {
+                console.error(error);
+                document.getElementById('errorText').innerHTML =
+                    '<span class="hidden-en">Calculation error: ' + error.message + '</span><span class="hidden-cn">计算错误: ' + error.message + '</span>';
+                document.getElementById('errorContainer').classList.remove('hidden');
+                document.getElementById('formContainer').classList.remove('hidden');
+                document.getElementById('loadingContainer').classList.add('hidden');
+            }
         });
     </script>
 </body>
