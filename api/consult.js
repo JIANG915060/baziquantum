@@ -1,6 +1,6 @@
-import fetch from 'node-fetch';
-
 export default async function handler(req, res) {
+  res.setHeader('Content-Type', 'application/json');
+
   // 只允许POST请求
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -14,7 +14,8 @@ export default async function handler(req, res) {
 
   const apiKey = process.env.DEEPSEEK_API_KEY;
   if (!apiKey) {
-    return res.status(500).json({ error: 'API配置错误' });
+    console.error('DEEPSEEK_API_KEY not configured');
+    return res.status(500).json({ error: 'API密钥未配置，请联系管理员' });
   }
 
   try {
@@ -39,11 +40,14 @@ export default async function handler(req, res) {
       ? `用户的八字信息：${JSON.stringify(birthChart, null, 2)}\n\n用户的问题：${question}`
       : `用户的问题：${question}`;
 
-    const response = await fetch('https://api.deepseek.com/chat/completions', {
+    console.log('Calling DeepSeek API...');
+
+    const deepseekResponse = await fetch('https://api.deepseek.com/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`
+        'Authorization': `Bearer ${apiKey}`,
+        'User-Agent': 'Bazi-Quantum/1.0'
       },
       body: JSON.stringify({
         model: 'deepseek-chat',
@@ -57,30 +61,45 @@ export default async function handler(req, res) {
       })
     });
 
-    if (!response.ok) {
-      const error = await response.json();
-      console.error('DeepSeek API Error:', error);
-      return res.status(response.status).json({
-        error: 'AI服务暂时不可用，请稍后重试'
+    console.log('DeepSeek response status:', deepseekResponse.status);
+
+    const responseText = await deepseekResponse.text();
+    console.log('DeepSeek raw response:', responseText.substring(0, 200));
+
+    let data;
+    try {
+      data = JSON.parse(responseText);
+    } catch (parseError) {
+      console.error('JSON parse error:', parseError);
+      console.error('Response text:', responseText);
+      return res.status(500).json({
+        error: 'API响应格式错误，请稍后重试'
       });
     }
 
-    const data = await response.json();
+    if (!deepseekResponse.ok) {
+      console.error('DeepSeek API error response:', data);
+      return res.status(deepseekResponse.status).json({
+        error: data.error?.message || 'AI服务暂时不可用'
+      });
+    }
+
     const answer = data.choices?.[0]?.message?.content;
 
     if (!answer) {
+      console.error('No answer in response:', data);
       return res.status(500).json({ error: '无法生成答案' });
     }
 
-    res.status(200).json({
-      answer,
+    return res.status(200).json({
+      answer: answer,
       timestamp: new Date().toISOString()
     });
 
   } catch (error) {
-    console.error('Consult API Error:', error);
-    res.status(500).json({
-      error: '服务器错误，请稍后重试'
+    console.error('Consult API Error:', error.message, error.stack);
+    return res.status(500).json({
+      error: '服务器内部错误：' + error.message
     });
   }
 }

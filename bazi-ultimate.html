@@ -1493,17 +1493,26 @@
                     body: JSON.stringify({
                         question: question,
                         birthChart: currentBaziData ? {
-                            name: document.getElementById('userName').value,
+                            name: document.getElementById('userName').value || 'Anonymous',
                             ganZhi: currentBaziData,
                             fateAnalysis: currentFateAnalysis
                         } : null
                     })
                 });
 
-                const data = await response.json();
+                let data;
+                try {
+                    data = await response.json();
+                } catch (parseErr) {
+                    throw new Error('<span class="hidden-en">Server response format error</span><span class="hidden-cn">服务器响应格式错误</span>');
+                }
 
                 if (!response.ok) {
-                    throw new Error(data.error || 'Service error');
+                    throw new Error(data.error || '<span class="hidden-en">Service temporarily unavailable</span><span class="hidden-cn">服务暂时不可用</span>');
+                }
+
+                if (!data.answer) {
+                    throw new Error('<span class="hidden-en">No answer received from AI</span><span class="hidden-cn">未收到AI回复</span>');
                 }
 
                 // 更新免费次数
@@ -1512,16 +1521,15 @@
                 document.getElementById('freeCount').textContent = newCount;
 
                 document.getElementById('consultLoading').classList.add('hidden');
-                document.getElementById('consultAnswer').innerHTML = data.answer;
+                document.getElementById('consultAnswer').textContent = data.answer;
                 document.getElementById('consultTime').textContent = new Date(data.timestamp).toLocaleString();
                 document.getElementById('consultResult').classList.remove('hidden');
 
             } catch (error) {
                 console.error('Consultation error:', error);
-                showConsultError(error.message);
-                document.getElementById('consultForm').classList.remove('hidden');
-            } finally {
                 document.getElementById('consultLoading').classList.add('hidden');
+                showConsultError(error.message || '<span class="hidden-en">An error occurred. Please try again.</span><span class="hidden-cn">发生错误，请重试。</span>');
+                document.getElementById('consultForm').classList.remove('hidden');
             }
         }
 
